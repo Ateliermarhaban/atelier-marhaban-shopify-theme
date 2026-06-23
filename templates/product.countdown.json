@@ -1,0 +1,342 @@
+{
+  "sections": {
+    "image_with_text_overlay_4dUDjW": {
+      "type": "image-with-text-overlay",
+      "blocks": {
+        "subheading_m4gGCp": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "Exclusive Offer"
+          }
+        },
+        "heading_bjN8JY": {
+          "type": "heading",
+          "settings": {
+            "title": "Limited time only",
+            "heading_max_width": 12,
+            "title_size": 60,
+            "title_size_mobile": 34,
+            "use_h1": false
+          }
+        },
+        "text_wQQ9Ec": {
+          "type": "text",
+          "disabled": true,
+          "settings": {
+            "enlarge_text": true
+          }
+        },
+        "countdown_LFjUXR": {
+          "type": "countdown",
+          "settings": {
+            "end_date": "",
+            "end_time": "",
+            "end_text": "",
+            "hide_on_end": false,
+            "number_size": 40,
+            "number_font": "base",
+            "divider_type": "line",
+            "show_timer_labels": true
+          }
+        }
+      },
+      "block_order": [
+        "subheading_m4gGCp",
+        "heading_bjN8JY",
+        "text_wQQ9Ec",
+        "countdown_LFjUXR"
+      ],
+      "settings": {
+        "height": "fixed",
+        "height_desktop": 480,
+        "height_mobile": 320,
+        "image_link": "",
+        "full_width": true,
+        "text_alignment": "center center",
+        "mobile_overlay_under": false,
+        "overlay_style": "full image-overlay--bg-shadow"
+      }
+    },
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_tax_and_shipping": false,
+            "enable_product_reviews_by_price": true
+          }
+        },
+        "vendor": {
+          "type": "vendor",
+          "settings": {
+          }
+        },
+        "651f80d0-6c6c-4fb7-9c1c-4e72770b5735": {
+          "type": "richtext",
+          "disabled": true,
+          "settings": {
+            "richtext": "<p>Sustainability as standard. <a href=\"\/pages\/our-story\" title=\"OUR STORY\">Read more<\/a><\/p>",
+            "icon": "leaf",
+            "icon_size": "small",
+            "enable_box": false,
+            "box_color": "#f7f1f0",
+            "show_in_quickbuy": false
+          }
+        },
+        "divider": {
+          "type": "divider",
+          "settings": {
+            "show_in_quickbuy": true
+          }
+        },
+        "variant_picker": {
+          "type": "variant-picker",
+          "settings": {
+            "show_single": false,
+            "selector_style": "dropdown"
+          }
+        },
+        "b85d4d3a-6205-4ab5-b5c8-ee6acdf358cd": {
+          "type": "inventory-level",
+          "settings": {
+            "show_inventory_notice": "always",
+            "show_inventory_count": "low",
+            "inventory_threshold": 10,
+            "enable_box": false,
+            "enable_pulse": true,
+            "show_in_quickbuy": true
+          }
+        },
+        "buy_buttons": {
+          "type": "buy-buttons",
+          "settings": {
+            "show_quantity_selector": true,
+            "enable_payment_button": true,
+            "show_backorder_text": true,
+            "show_pickup_availability": false,
+            "show_gift_card_recipient": false
+          }
+        },
+        "countdown_DxcLcC": {
+          "type": "countdown",
+          "settings": {
+            "heading": "Extended Exclusive Offer",
+            "end_date": "",
+            "end_time": "",
+            "end_text": "",
+            "hide_on_end": false,
+            "box_color": "#c16452",
+            "text_color": "#ffffff",
+            "number_font": "base",
+            "divider_type": "line",
+            "show_timer_labels": true,
+            "show_in_quickbuy": false
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "show_in_tab": true,
+            "open_tab": true,
+            "icon": "eye",
+            "show_in_quickbuy": false
+          }
+        },
+        "bde01aa0-d035-4eb8-aaba-0b8bd0b898ca": {
+          "type": "accordion",
+          "settings": {
+            "icon": "box",
+            "page": "",
+            "open": false,
+            "show_in_quickbuy": false
+          }
+        },
+        "555e5fa2-76ef-481f-aa5c-6f7a8adcc078": {
+          "type": "accordion",
+          "settings": {
+            "icon": "price_tag",
+            "page": "",
+            "open": false,
+            "show_in_quickbuy": false
+          }
+        },
+        "18482d69-8c2d-478e-8762-822107c38825": {
+          "type": "related-products",
+          "settings": {
+            "title": "Related products",
+            "product_list": [
+              "swim-systems-shadow-p110-cecilia-1pc",
+              "b-swim-deedi-u74-belize-bralette"
+            ]
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "vendor",
+        "651f80d0-6c6c-4fb7-9c1c-4e72770b5735",
+        "divider",
+        "variant_picker",
+        "b85d4d3a-6205-4ab5-b5c8-ee6acdf358cd",
+        "buy_buttons",
+        "countdown_DxcLcC",
+        "description",
+        "bde01aa0-d035-4eb8-aaba-0b8bd0b898ca",
+        "555e5fa2-76ef-481f-aa5c-6f7a8adcc078",
+        "18482d69-8c2d-478e-8762-822107c38825"
+      ],
+      "settings": {
+        "show_breadcrumbs": false,
+        "show_location_underneath": false,
+        "inventory_transfers_enable": true,
+        "enable_sticky_columns": true,
+        "enable_sticky_atc": false,
+        "sticky_atc_position": "end",
+        "sticky_atc_mobile": true,
+        "sticky_atc_behavior": "scroll",
+        "sticky_atc_button_style": "secondary",
+        "gallery_size": "medium",
+        "gallery_layout": "carousel-under",
+        "enable_zoom": true,
+        "show_alt_text": false,
+        "alt_text_icon": "",
+        "enable_video_autoplay": true,
+        "enable_video_looping": true,
+        "enable_media_grouping": false,
+        "media_grouping_option": "Color,Colour,Couleur,Farbe"
+      }
+    },
+    "162739056221d4c42a": {
+      "type": "image-with-text-overlay",
+      "blocks": {
+        "61312c04-eda5-4f76-9c1e-5df2cfc0c9b9": {
+          "type": "subheading",
+          "settings": {
+          }
+        },
+        "07cf6c3c-c7fc-45a1-ac2b-90da59b1418f": {
+          "type": "heading",
+          "settings": {
+            "heading_max_width": 12,
+            "title_size": 56,
+            "title_size_mobile": 32,
+            "use_h1": false
+          }
+        },
+        "52adedfa-af61-419d-996e-be35a78de4f6": {
+          "type": "text",
+          "settings": {
+            "enlarge_text": true
+          }
+        }
+      },
+      "block_order": [
+        "61312c04-eda5-4f76-9c1e-5df2cfc0c9b9",
+        "07cf6c3c-c7fc-45a1-ac2b-90da59b1418f",
+        "52adedfa-af61-419d-996e-be35a78de4f6"
+      ],
+      "settings": {
+        "height": "fixed",
+        "height_desktop": 680,
+        "height_mobile": 500,
+        "image_link": "",
+        "full_width": true,
+        "text_alignment": "center center",
+        "mobile_overlay_under": false,
+        "overlay_style": "full image-overlay--bg-shadow"
+      }
+    },
+    "16273906029cc7f369": {
+      "type": "image-with-text",
+      "blocks": {
+        "3cb36bcb-8282-4ea2-a3f7-2d049394c551": {
+          "type": "subheading",
+          "settings": {
+          }
+        },
+        "1cb84edd-a839-44b6-94be-f4618ef1c033": {
+          "type": "heading",
+          "settings": {
+            "use_h1": false
+          }
+        },
+        "12feb10a-c2b5-406a-a2be-aec4652e67ad": {
+          "type": "text",
+          "settings": {
+            "enlarge_text": false
+          }
+        }
+      },
+      "block_order": [
+        "3cb36bcb-8282-4ea2-a3f7-2d049394c551",
+        "1cb84edd-a839-44b6-94be-f4618ef1c033",
+        "12feb10a-c2b5-406a-a2be-aec4652e67ad"
+      ],
+      "settings": {
+        "image_width": 700,
+        "image_link": "",
+        "image_position": "left",
+        "text_alignment": "left",
+        "color_scheme": "default"
+      }
+    },
+    "16273908745156e185": {
+      "type": "image-with-text",
+      "blocks": {
+        "7f9cfed1-d505-4a52-bd09-83d54d8e4c5e": {
+          "type": "heading",
+          "settings": {
+            "use_h1": false
+          }
+        },
+        "b9e90b6d-35bb-4256-a69f-55d6e85c2636": {
+          "type": "text",
+          "settings": {
+            "enlarge_text": false
+          }
+        },
+        "fb7c3c26-187d-4cc1-b41f-1d48134f2977": {
+          "type": "button",
+          "settings": {
+            "button_style": "primary"
+          }
+        }
+      },
+      "block_order": [
+        "7f9cfed1-d505-4a52-bd09-83d54d8e4c5e",
+        "b9e90b6d-35bb-4256-a69f-55d6e85c2636",
+        "fb7c3c26-187d-4cc1-b41f-1d48134f2977"
+      ],
+      "settings": {
+        "image_width": 700,
+        "image_link": "",
+        "image_position": "right",
+        "text_alignment": "left",
+        "color_scheme": "1"
+      }
+    },
+    "recommendations": {
+      "type": "related-products",
+      "settings": {
+        "title": "You may also like",
+        "show_vendor": false,
+        "grid": 4
+      }
+    }
+  },
+  "order": [
+    "image_with_text_overlay_4dUDjW",
+    "main",
+    "162739056221d4c42a",
+    "16273906029cc7f369",
+    "16273908745156e185",
+    "recommendations"
+  ]
+}
