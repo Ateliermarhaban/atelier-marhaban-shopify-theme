@@ -1,0 +1,29 @@
+# macOS systeembestanden
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Thumbnails
+.Spotlight-V100
+.Trashes
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+
+# Shopify CLI
+.shopify/
