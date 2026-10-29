@@ -1,0 +1,48 @@
+# Render.com blueprint — 1-klik deploy van de connector.
+# Gebruik: Render dashboard > New > Blueprint > selecteer deze repo.
+# Render bouwt de Docker-image, draait de service 24/7 en herstart bij een crash.
+services:
+  - type: web
+    name: odoo-shopify-connector
+    runtime: docker
+    rootDir: odoo-shopify-connector
+    # 'starter' is een kleine, altijd-aan instance. Gebruik GEEN free plan:
+    # die valt in slaap en dan stopt de Odoo->Shopify-poller.
+    plan: starter
+    region: frankfurt
+    healthCheckPath: /health
+    # Persistente schijf zodat state.json (laatste poll-tijd) een herstart overleeft.
+    disk:
+      name: connector-state
+      mountPath: /app/data
+      sizeGB: 1
+    envVars:
+      - key: STATE_FILE
+        value: /app/data/state.json
+      - key: POLL_INTERVAL_SECONDS
+        value: "120"
+      - key: DRY_RUN
+        value: "false"
+      # De volgende secrets vul je in het Render-dashboard in (sync: false).
+      - key: ODOO_URL
+        sync: false
+      - key: ODOO_DB
+        sync: false
+      - key: ODOO_USERNAME
+        sync: false
+      - key: ODOO_API_KEY
+        sync: false
+      - key: ODOO_LOCATION_NAME
+        sync: false
+      - key: SHOPIFY_SHOP
+        sync: false
+      - key: SHOPIFY_ACCESS_TOKEN
+        sync: false
+      - key: SHOPIFY_API_VERSION
+        sync: false
+      - key: SHOPIFY_LOCATION_ID
+        sync: false
+      - key: SHOPIFY_WEBHOOK_SECRET
+        sync: false
+      - key: PUBLIC_URL
+        sync: false
