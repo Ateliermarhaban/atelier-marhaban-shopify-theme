@@ -90,9 +90,11 @@ Volledig gratis alternatief zonder server of creditcard: een geplande taak (`.gi
 
 **Instellen:**
 1. **Merge deze branch naar `main`.** Geplande (cron) workflows draaien in GitHub alleen vanaf de default branch.
-2. Zet de credentials als **repository secrets** (GitHub repo → Settings → Secrets and variables → Actions → New repository secret). Dit doe jij; de waarden komen nooit in de code:
-   - `ODOO_URL`, `ODOO_DB`, `ODOO_USERNAME`, `ODOO_API_KEY`, `ODOO_LOCATION_NAME`
-   - `SHOPIFY_SHOP`, `SHOPIFY_ACCESS_TOKEN`, `SHOPIFY_API_VERSION`, `SHOPIFY_LOCATION_ID`
+2. Zet de credentials als **repository secrets** (GitHub repo → Settings → Secrets and variables → Actions → New repository secret). Dit doe jij; de waarden komen nooit in de code. De niet-geheime config (Odoo-URL, shop, location-id, API-versie) staat al in de workflow, dus enkel deze geheimen zijn nodig:
+   - `ODOO_USERNAME`, `ODOO_API_KEY`
+   - `SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`
+
+   **Shopify-authenticatie (nieuwe Dev Dashboard):** er bestaat geen vast access token meer. Maak in het [Dev Dashboard](https://dev.shopify.com/) een app aan (zelfde organisatie als je winkel), stel de scopes in (`read_products, read_inventory, write_inventory, read_orders, write_orders`), **release** en **installeer de app op je winkel**. Onder Settings → Credentials vind je **Client ID** en **Client secret** — die zet je als secrets. De connector vraagt daarmee per run zelf een token op via de `client_credentials`-grant (geldig ~24u, geen vast token nodig).
 3. (Optioneel) Voeg een **repository variable** `DRY_RUN` = `true` toe om eerst alleen te loggen zonder iets weg te schrijven. Zet op `false` (of verwijder) als alles klopt.
 4. Test handmatig: repo → **Actions** → "Voorraadsync Odoo <-> Shopify" → **Run workflow**. Bekijk de log.
 5. Daarna draait de taak automatisch volgens het cron-schema.

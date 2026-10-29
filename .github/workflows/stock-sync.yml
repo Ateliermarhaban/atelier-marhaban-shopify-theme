@@ -34,11 +34,13 @@ jobs:
           ODOO_DB: ateliermarhaban
           ODOO_LOCATION_NAME: WH/Stock
           SHOPIFY_SHOP: a67ee0-af.myshopify.com
-          SHOPIFY_API_VERSION: '2025-01'
+          SHOPIFY_API_VERSION: '2026-10'
           SHOPIFY_LOCATION_ID: '98409709893'
           # --- Geheimen: vul je in onder Settings > Secrets > Actions ---
           ODOO_USERNAME: ${{ secrets.ODOO_USERNAME }}
           ODOO_API_KEY: ${{ secrets.ODOO_API_KEY }}
-          SHOPIFY_ACCESS_TOKEN: ${{ secrets.SHOPIFY_ACCESS_TOKEN }}
+          # Nieuwe Dev Dashboard-app: token wordt per run opgehaald via client_credentials.
+          SHOPIFY_CLIENT_ID: ${{ secrets.SHOPIFY_CLIENT_ID }}
+          SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
           # Zet DRY_RUN op 'true' (repo variable) om eerst alleen te loggen.
           DRY_RUN: ${{ vars.DRY_RUN }}

@@ -18,8 +18,12 @@ export const config = {
   },
   shopify: {
     shop: required('SHOPIFY_SHOP'),
-    accessToken: required('SHOPIFY_ACCESS_TOKEN'),
-    apiVersion: process.env.SHOPIFY_API_VERSION || '2025-01',
+    // Authenticatie: ofwel een vast access token, ofwel client_id + client_secret
+    // (nieuwe Dev Dashboard; token wordt dan per run opgehaald via client_credentials).
+    accessToken: process.env.SHOPIFY_ACCESS_TOKEN || '',
+    clientId: process.env.SHOPIFY_CLIENT_ID || '',
+    clientSecret: process.env.SHOPIFY_CLIENT_SECRET || '',
+    apiVersion: process.env.SHOPIFY_API_VERSION || '2026-10',
     locationId: process.env.SHOPIFY_LOCATION_ID || '',
     webhookSecret: process.env.SHOPIFY_WEBHOOK_SECRET || '',
   },

@@ -3,14 +3,53 @@ import { config } from './config.js';
 
 const BASE = `https://${config.shopify.shop}/admin/api/${config.shopify.apiVersion}`;
 
+// --- Authenticatie ---
+// Ofwel een vast access token (SHOPIFY_ACCESS_TOKEN), ofwel client_credentials:
+// met SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET vragen we per proces een token aan
+// via /admin/oauth/access_token. Dat token is ~24u geldig; we cachen het in-memory
+// voor de duur van deze run.
+let cachedToken = null;
+let cachedTokenExpiry = 0;
+
+async function getAccessToken() {
+  if (config.shopify.accessToken) return config.shopify.accessToken;
+
+  if (cachedToken && Date.now() < cachedTokenExpiry - 60000) return cachedToken;
+
+  if (!config.shopify.clientId || !config.shopify.clientSecret) {
+    throw new Error(
+      'Geen Shopify-authenticatie: zet SHOPIFY_ACCESS_TOKEN, of SHOPIFY_CLIENT_ID + SHOPIFY_CLIENT_SECRET.'
+    );
+  }
+
+  const res = await fetch(`https://${config.shopify.shop}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: config.shopify.clientId,
+      client_secret: config.shopify.clientSecret,
+    }),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Shopify token-aanvraag (client_credentials) faalde (${res.status}): ${text}`);
+  }
+  const data = await res.json();
+  cachedToken = data.access_token;
+  cachedTokenExpiry = Date.now() + (data.expires_in ? data.expires_in * 1000 : 3600000);
+  return cachedToken;
+}
+
 // Low-level request met retry op rate-limiting (429). Geeft json + de Link-header
 // terug (die Link-header gebruiken we voor cursor-paginatie).
 async function shopifyRequest(path, { method = 'GET', body } = {}) {
+  const token = await getAccessToken();
   for (let attempt = 0; attempt < 5; attempt++) {
     const res = await fetch(`${BASE}${path}`, {
       method,
       headers: {
-        'X-Shopify-Access-Token': config.shopify.accessToken,
+        'X-Shopify-Access-Token': token,
         'Content-Type': 'application/json',
       },
       body: body ? JSON.stringify(body) : undefined,
