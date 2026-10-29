@@ -2,6 +2,10 @@
 
 Bidirectionele voorraadsync tussen **Shopify** (webshop + POS) en **Odoo Online (SaaS, v20)** voor Atelier Marhaban.
 
+> **Twee manieren om te draaien:**
+> - **Realtime (betaald):** altijd-aan service met webhook + poller — zie "Deploy" hieronder. Vereist een betaalde host (~€7/mnd).
+> - **Gratis (GitHub Actions cron):** een geplande taak die elke ~30 min pollt. Geen server, geen kaart. Niet realtime (zie [Gratis variant](#gratis-variant-github-actions)).
+
 ## Wat het doet
 
 | Trigger | Gevolg |
@@ -73,6 +77,27 @@ npm run register-webhooks   # registreert orders/create -> PUBLIC_URL/webhooks/o
 Daarna loopt alles automatisch: elke Shopify-verkoop (web/POS) triggert de webhook, en de poller synct Odoo-wijzigingen elke `POLL_INTERVAL_SECONDS`.
 
 **Tip:** zet eerst `DRY_RUN=true`, controleer de logs een dag, en zet daarna op `false`.
+
+## Gratis variant (GitHub Actions)
+
+Volledig gratis alternatief zonder server of creditcard: een geplande taak (`.github/workflows/stock-sync.yml`) draait elke ~30 minuten `src/sync-once.js`, die beide richtingen pollt.
+
+**Verschil met de realtime versie:**
+- Geen webhook/altijd-aan server. In plaats daarvan pollt elke run de nieuwe Shopify-orders én de Odoo-voorraad.
+- **Niet realtime:** een wijziging is pas na maximaal één interval (~30 min) in het andere systeem verwerkt.
+- Shopify-orders worden gededupliceerd met het label **`odoo-synced`**: een verwerkte order krijgt dat label en wordt daarna overgeslagen. Verwijder het label niet handmatig.
+- De Odoo→Shopify-kant is een volledige herberekening per run (idempotent en zelfherstellend).
+
+**Instellen:**
+1. **Merge deze branch naar `main`.** Geplande (cron) workflows draaien in GitHub alleen vanaf de default branch.
+2. Zet de credentials als **repository secrets** (GitHub repo → Settings → Secrets and variables → Actions → New repository secret). Dit doe jij; de waarden komen nooit in de code:
+   - `ODOO_URL`, `ODOO_DB`, `ODOO_USERNAME`, `ODOO_API_KEY`, `ODOO_LOCATION_NAME`
+   - `SHOPIFY_SHOP`, `SHOPIFY_ACCESS_TOKEN`, `SHOPIFY_API_VERSION`, `SHOPIFY_LOCATION_ID`
+3. (Optioneel) Voeg een **repository variable** `DRY_RUN` = `true` toe om eerst alleen te loggen zonder iets weg te schrijven. Zet op `false` (of verwijder) als alles klopt.
+4. Test handmatig: repo → **Actions** → "Voorraadsync Odoo <-> Shopify" → **Run workflow**. Bekijk de log.
+5. Daarna draait de taak automatisch volgens het cron-schema.
+
+**Let op gratis Actions-minuten:** een private repo krijgt 2000 minuten/maand gratis. Elke 30 min = ~1440 runs/maand. Houd runs kort; verlaag de frequentie als je tegen de limiet aanloopt. Een public repo heeft onbeperkte minuten.
 
 ## Belangrijke aandachtspunten
 
