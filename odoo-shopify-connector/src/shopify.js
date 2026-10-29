@@ -221,6 +221,26 @@ export async function getAvailableByItem(inventoryItemId) {
   return level ? level.available : null;
 }
 
+/**
+ * Bulk: beschikbare voorraad voor veel inventory_item_ids tegelijk (50 per call).
+ * Geeft Map inventoryItemId -> available. Scheelt duizenden losse calls.
+ */
+export async function getAvailableLevelsBulk(inventoryItemIds) {
+  const result = new Map();
+  const chunkSize = 50;
+  for (let i = 0; i < inventoryItemIds.length; i += chunkSize) {
+    const chunk = inventoryItemIds.slice(i, i + chunkSize);
+    const data = await shopifyFetch(
+      `/inventory_levels.json?inventory_item_ids=${chunk.join(',')}` +
+      `&location_ids=${config.shopify.locationId}&limit=250`
+    );
+    for (const level of data.inventory_levels || []) {
+      result.set(level.inventory_item_id, level.available);
+    }
+  }
+  return result;
+}
+
 export async function setAvailableByItem(inventoryItemId, qty) {
   if (!config.shopify.locationId) {
     throw new Error('SHOPIFY_LOCATION_ID is niet ingesteld.');

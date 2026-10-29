@@ -105,6 +105,34 @@ export async function getFreeQty(sku) {
 }
 
 /**
+ * Bulk: free_qty voor ALLE producten met een SKU, in enkele paginated calls.
+ * Veel sneller dan per SKU afzonderlijk opvragen. Geeft Map sku -> free_qty.
+ */
+export async function getAllFreeQtyBySku() {
+  const locationIds = await getStockLocationIds();
+  const context = locationIds.length ? { location: locationIds[0] } : {};
+  const result = new Map();
+  const pageSize = 1000;
+  let offset = 0;
+  while (true) {
+    const records = await execute('product.product', 'search_read', [
+      [['default_code', '!=', false]],
+    ], {
+      fields: ['default_code', 'free_qty'],
+      limit: pageSize,
+      offset,
+      context,
+    });
+    for (const rec of records) {
+      if (rec.default_code) result.set(rec.default_code, Math.floor(rec.free_qty || 0));
+    }
+    if (records.length < pageSize) break;
+    offset += pageSize;
+  }
+  return result;
+}
+
+/**
  * Hoeveelheden die gereserveerd zijn door OPEN, NIET-verlopen offertes.
  * Een offerte = sale.order in state 'draft' of 'sent'. Een offerte telt mee zolang
  * ze geen validity_date heeft of de validity_date vandaag of later valt; is de

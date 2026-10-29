@@ -48,33 +48,40 @@ async function shopifyToOdoo() {
   }
 }
 
-/** Richting 2: Odoo-voorraad (incl. offerte-reserveringen) naar Shopify. */
+/** Richting 2: Odoo-voorraad (incl. offerte-reserveringen) naar Shopify.
+ *  Bulk-aanpak: Odoo free_qty en Shopify-niveaus worden in enkele calls opgehaald
+ *  en in het geheugen vergeleken; alleen afwijkingen worden weggeschreven. */
 async function odooToShopify() {
-  const reservations = await odoo.getOpenQuotationReservations();
-  const variants = await shopify.listAllVariantsWithSku();
-  log(`[odoo->shopify] ${variants.length} Shopify-variant(en) met SKU; ${reservations.size} SKU('s) gereserveerd door offertes.`);
+  const [reservations, variants, freeBySku] = await Promise.all([
+    odoo.getOpenQuotationReservations(),
+    shopify.listAllVariantsWithSku(),
+    odoo.getAllFreeQtyBySku(),
+  ]);
+  const levels = await shopify.getAvailableLevelsBulk(variants.map((v) => v.inventoryItemId));
+  log(`[odoo->shopify] ${variants.length} Shopify-variant(en); ${freeBySku.size} Odoo-SKU('s); ${reservations.size} gereserveerd door offertes.`);
 
   let updated = 0;
+  let changes = 0;
   for (const { sku, inventoryItemId } of variants) {
-    try {
-      const free = await odoo.getFreeQty(sku);
-      if (free === null) continue; // SKU niet in Odoo -> overslaan
-      const available = Math.max(0, free - (reservations.get(sku) || 0));
+    const free = freeBySku.get(sku);
+    if (free === undefined) continue; // SKU niet in Odoo -> overslaan
+    const available = Math.max(0, free - (reservations.get(sku) || 0));
+    const current = levels.get(inventoryItemId);
+    if (current === available) continue; // al gelijk
 
-      if (config.service.dryRun) {
-        log(`[odoo->shopify][DRY] ${sku}: free=${free} res=${reservations.get(sku) || 0} => ${available}`);
-        continue;
-      }
-      const current = await shopify.getAvailableByItem(inventoryItemId);
-      if (current === available) continue; // al gelijk
+    changes++;
+    if (config.service.dryRun) {
+      log(`[odoo->shopify][DRY] ${sku}: ${current} -> ${available} (free ${free}, res ${reservations.get(sku) || 0}).`);
+      continue;
+    }
+    try {
       await shopify.setAvailableByItem(inventoryItemId, available);
       updated++;
-      log(`[odoo->shopify] ${sku}: available ${current} -> ${available}.`);
     } catch (err) {
       log(`[odoo->shopify] FOUT voor SKU ${sku}:`, err.message);
     }
   }
-  log(`[odoo->shopify] ${updated} variant(en) bijgewerkt.`);
+  log(`[odoo->shopify] ${changes} afwijking(en) gevonden, ${config.service.dryRun ? 0 : updated} weggeschreven.`);
 }
 
 async function main() {
