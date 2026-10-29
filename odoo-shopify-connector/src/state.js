@@ -3,7 +3,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const STATE_FILE = path.join(__dirname, '..', 'state.json');
+// STATE_FILE kan via env naar een persistente schijf wijzen (bv. op Render),
+// zodat de poll-status een herstart van de container overleeft.
+const STATE_FILE = process.env.STATE_FILE || path.join(__dirname, '..', 'state.json');
 
 function load() {
   try {

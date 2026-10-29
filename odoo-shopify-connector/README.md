@@ -51,12 +51,28 @@ npm run test-connection
 ```
 Dit toont o.a. de beschikbare Shopify-locaties. Zet het juiste id in `SHOPIFY_LOCATION_ID`.
 
-### 5. Deploy + webhooks
-Deploy de service ergens met een publieke HTTPS-URL (Railway, Render, Fly.io, of een VPS met reverse proxy). Zet die URL in `PUBLIC_URL`, start de service en registreer de webhook:
+### 5. Deploy (automatisch 24/7 draaien)
+
+De service moet continu draaien zodat de webhook verkopen opvangt en de poller Odoo blijft uitlezen. Er zit een `Dockerfile` en een Render-blueprint (`render.yaml`) bij voor een vrijwel kant-en-klare deploy.
+
+**Aanbevolen: Render (1-klik blueprint)**
+1. Ga naar [dashboard.render.com](https://dashboard.render.com) → **New → Blueprint** → kies deze GitHub-repo.
+2. Render leest `render.yaml` en maakt de service aan (altijd-aan `starter`-plan, Frankfurt, met persistente schijf voor `state.json`).
+3. Vul in het dashboard de secrets in (ze staan op `sync: false`): de `ODOO_*`- en `SHOPIFY_*`-waarden, en `PUBLIC_URL` = de URL die Render je geeft (bv. `https://odoo-shopify-connector.onrender.com`).
+4. Deploy. De service start automatisch de webhook-server én de poller, en herstart vanzelf bij een crash of na een nieuwe commit.
+
+> Gebruik geen gratis plan: free web services vallen in slaap, waardoor de poller stopt en webhooks traag reageren.
+
+Andere hosts (Railway, Fly.io, een eigen VPS) werken ook via de `Dockerfile` — zet daar dezelfde env-variabelen.
+
+### 6. Webhook registreren (eenmalig)
+Zodra de service draait op zijn publieke URL en `PUBLIC_URL` gezet is, registreer je de Shopify-webhook één keer. Dit kan lokaal of vanaf de server:
 ```bash
-npm start                 # draait webhook-server + poller
-npm run register-webhooks # eenmalig, registreert orders/create
+npm run register-webhooks   # registreert orders/create -> PUBLIC_URL/webhooks/orders
 ```
+Daarna loopt alles automatisch: elke Shopify-verkoop (web/POS) triggert de webhook, en de poller synct Odoo-wijzigingen elke `POLL_INTERVAL_SECONDS`.
+
+**Tip:** zet eerst `DRY_RUN=true`, controleer de logs een dag, en zet daarna op `false`.
 
 ## Belangrijke aandachtspunten
 
@@ -77,4 +93,6 @@ src/server.js   Express webhook-server (start ook de poller)
 src/poller.js   Odoo → Shopify polling-loop
 src/state.js    persistente staat (laatste poll + echo-cache)
 scripts/        test-connection, register-webhooks
+Dockerfile      container-image voor deploy
+render.yaml     Render blueprint (1-klik deploy, altijd-aan + schijf)
 ```
