@@ -256,4 +256,45 @@ export async function setAvailableByItem(inventoryItemId, qty) {
   return qty;
 }
 
+// --- Klanten / adressen ---
+
+/**
+ * Alle Shopify-klanten (gepagineerd), met hun standaardadres.
+ */
+export async function listAllCustomers() {
+  const out = [];
+  let path = `/customers.json?limit=250`;
+  while (path) {
+    const { json, link } = await shopifyRequest(path);
+    for (const c of json.customers || []) {
+      out.push({
+        id: c.id,
+        email: c.email,
+        first_name: c.first_name,
+        last_name: c.last_name,
+        phone: c.phone,
+        default_address: c.default_address || null,
+      });
+    }
+    const next = parseNextPageInfo(link);
+    path = next ? `/customers.json?limit=250&page_info=${next}` : null;
+  }
+  return out;
+}
+
+/**
+ * Maak een nieuwe Shopify-klant aan, optioneel met één adres.
+ */
+export async function createCustomer({ email, firstName, lastName, phone, address }) {
+  const customer = { email };
+  if (firstName) customer.first_name = firstName;
+  if (lastName) customer.last_name = lastName;
+  if (phone) customer.phone = phone;
+  if (address) {
+    customer.addresses = [address];
+  }
+  const data = await shopifyFetch('/customers.json', { method: 'POST', body: { customer } });
+  return data.customer;
+}
+
 export { shopifyFetch };

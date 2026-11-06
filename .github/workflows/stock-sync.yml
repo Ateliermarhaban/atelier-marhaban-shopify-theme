@@ -66,6 +66,8 @@ jobs:
           DRY_RUN: ${{ vars.DRY_RUN }}
           SYNC_INTERVAL_MIN: ${{ vars.SYNC_INTERVAL_MIN }}
           SYNC_LOOP: ${{ vars.SYNC_LOOP }}
+          # Zet SYNC_CUSTOMERS op 'false' (repo variable) om klant-/adressync uit te zetten.
+          SYNC_CUSTOMERS: ${{ vars.SYNC_CUSTOMERS }}
       - name: Volgende lus starten
         # workflow_dispatch met GITHUB_TOKEN start wel degelijk een nieuwe run.
         # Door de concurrency-groep staat die in de wachtrij tot deze run klaar is.

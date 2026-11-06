@@ -264,3 +264,97 @@ export async function getChangedStockSince(isoDatetime) {
   }
   return results;
 }
+
+// --- Klanten / adressen (res.partner) ---
+
+// Landen één keer inladen: code <-> id in beide richtingen.
+let countryCache = null;
+async function loadCountries() {
+  if (countryCache) return countryCache;
+  const records = await execute('res.country', 'search_read', [[]], { fields: ['code'] });
+  const byCode = new Map();
+  const byId = new Map();
+  for (const c of records) {
+    if (c.code) {
+      byCode.set(c.code.toUpperCase(), c.id);
+      byId.set(c.id, c.code.toUpperCase());
+    }
+  }
+  countryCache = { byCode, byId };
+  return countryCache;
+}
+
+export async function getCountryIdByCode(code) {
+  if (!code) return null;
+  const { byCode } = await loadCountries();
+  return byCode.get(String(code).toUpperCase()) || null;
+}
+
+export async function getCountryCodeById(id) {
+  if (!id) return null;
+  const { byId } = await loadCountries();
+  return byId.get(id) || null;
+}
+
+/**
+ * Alle e-mailadressen die al op een res.partner staan (ongeacht type), als lowercase Set.
+ * Dient als dedup-doel voor Shopify -> Odoo: we maken geen partner aan die al bestaat.
+ */
+export async function getAllPartnerEmails() {
+  const emails = new Set();
+  const pageSize = 1000;
+  let offset = 0;
+  while (true) {
+    const records = await execute('res.partner', 'search_read', [
+      [['email', '!=', false]],
+    ], { fields: ['email'], limit: pageSize, offset });
+    for (const r of records) {
+      if (r.email) emails.add(r.email.trim().toLowerCase());
+    }
+    if (records.length < pageSize) break;
+    offset += pageSize;
+  }
+  return emails;
+}
+
+/**
+ * Klant-partners (customer_rank > 0) met e-mail, inclusief adresvelden.
+ * Bron voor Odoo -> Shopify.
+ */
+export async function listCustomerPartners() {
+  const results = [];
+  const pageSize = 1000;
+  let offset = 0;
+  while (true) {
+    const records = await execute('res.partner', 'search_read', [
+      [['customer_rank', '>', 0], ['email', '!=', false]],
+    ], {
+      fields: ['name', 'email', 'phone', 'street', 'street2', 'city', 'zip', 'country_id'],
+      limit: pageSize,
+      offset,
+    });
+    results.push(...records);
+    if (records.length < pageSize) break;
+    offset += pageSize;
+  }
+  return results;
+}
+
+/**
+ * Maak een nieuwe klant-partner aan in Odoo (customer_rank = 1).
+ */
+export async function createCustomerPartner({ name, email, phone, street, street2, city, zip, countryCode }) {
+  const values = {
+    name: name || email,
+    email,
+    customer_rank: 1,
+  };
+  if (phone) values.phone = phone;
+  if (street) values.street = street;
+  if (street2) values.street2 = street2;
+  if (city) values.city = city;
+  if (zip) values.zip = zip;
+  const countryId = await getCountryIdByCode(countryCode);
+  if (countryId) values.country_id = countryId;
+  return execute('res.partner', 'create', [values]);
+}

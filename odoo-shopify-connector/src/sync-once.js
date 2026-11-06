@@ -9,6 +9,7 @@
 import * as odoo from './odoo.js';
 import * as shopify from './shopify.js';
 import { config } from './config.js';
+import { syncCustomers } from './customers.js';
 
 function log(...args) {
   console.log(new Date().toISOString(), ...args);
@@ -89,6 +90,14 @@ async function main() {
   // Eerst verkopen in Odoo boeken, daarna de beschikbaarheid terug naar Shopify.
   await shopifyToOdoo();
   await odooToShopify();
+  // Klant-/adressynchronisatie (beide richtingen, alleen nieuwe).
+  if (config.service.syncCustomers) {
+    try {
+      await syncCustomers();
+    } catch (err) {
+      log('[klanten] FOUT:', err.message);
+    }
+  }
   log('Batch-sync klaar.');
 }
 

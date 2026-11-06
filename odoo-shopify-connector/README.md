@@ -94,12 +94,22 @@ Volledig gratis alternatief zonder server of creditcard: een geplande taak (`.gi
    - `ODOO_USERNAME`, `ODOO_API_KEY`
    - `SHOPIFY_CLIENT_ID`, `SHOPIFY_CLIENT_SECRET`
 
-   **Shopify-authenticatie (nieuwe Dev Dashboard):** er bestaat geen vast access token meer. Maak in het [Dev Dashboard](https://dev.shopify.com/) een app aan (zelfde organisatie als je winkel), stel de scopes in (`read_products, read_inventory, write_inventory, read_orders, write_orders`), **release** en **installeer de app op je winkel**. Onder Settings → Credentials vind je **Client ID** en **Client secret** — die zet je als secrets. De connector vraagt daarmee per run zelf een token op via de `client_credentials`-grant (geldig ~24u, geen vast token nodig).
+   **Shopify-authenticatie (nieuwe Dev Dashboard):** er bestaat geen vast access token meer. Maak in het [Dev Dashboard](https://dev.shopify.com/) een app aan (zelfde organisatie als je winkel), stel de scopes in (`read_products, read_inventory, write_inventory, read_orders, write_orders, read_customers, write_customers`), **release** en **installeer de app op je winkel**. Onder Settings → Credentials vind je **Client ID** en **Client secret** — die zet je als secrets. De connector vraagt daarmee per run zelf een token op via de `client_credentials`-grant (geldig ~24u, geen vast token nodig).
 3. (Optioneel) Voeg een **repository variable** `DRY_RUN` = `true` toe om eerst alleen te loggen zonder iets weg te schrijven. Zet op `false` (of verwijder) als alles klopt.
 4. Test handmatig: repo → **Actions** → "Voorraadsync Odoo <-> Shopify" → **Run workflow**. Bekijk de log.
 5. Daarna draait de taak automatisch volgens het cron-schema.
 
 **Let op gratis Actions-minuten:** een private repo krijgt 2000 minuten/maand gratis. Elke 30 min = ~1440 runs/maand. Houd runs kort; verlaag de frequentie als je tegen de limiet aanloopt. Een public repo heeft onbeperkte minuten.
+
+## Klant-/adressynchronisatie
+
+Naast voorraad synct de connector ook **klanten en hun adres**, beide richtingen, matchend op **e-mailadres** (create-if-new):
+- **Shopify-klant → Odoo:** nieuwe Shopify-klanten worden als `res.partner` (met `customer_rank = 1`) aangemaakt als dat e-mailadres nog niet in Odoo bestaat.
+- **Odoo-klant → Shopify:** Odoo-contacten met `customer_rank > 0` worden als Shopify-klant aangemaakt als dat e-mailadres daar nog niet bestaat.
+- Alleen **echte klanten** tellen mee (geen leveranciers/overige contacten). Bestaande records worden nooit overschreven of gedupliceerd, en er ontstaat geen lus.
+- Uitschakelen kan met repository-variable `SYNC_CUSTOMERS` = `false`.
+
+> **Vereiste Shopify-scopes:** hiervoor moet de app ook `read_customers` en `write_customers` hebben. Voeg die toe in het Dev Dashboard (nieuwe appversie → **release**) en **installeer de app opnieuw/accordeer de extra toegang** op je winkel; anders geven de klant-calls een 403.
 
 ## Belangrijke aandachtspunten
 

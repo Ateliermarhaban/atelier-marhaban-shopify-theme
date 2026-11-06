@@ -32,5 +32,8 @@ export const config = {
     publicUrl: (process.env.PUBLIC_URL || '').replace(/\/$/, ''),
     pollIntervalSeconds: parseInt(process.env.POLL_INTERVAL_SECONDS || '120', 10),
     dryRun: String(process.env.DRY_RUN).toLowerCase() === 'true',
+    // Klant-/adressynchronisatie aan of uit (standaard aan; alleen 'false' zet uit,
+    // zodat een lege/niet-ingestelde repo-variable nog steeds "aan" betekent).
+    syncCustomers: String(process.env.SYNC_CUSTOMERS ?? 'true').toLowerCase() !== 'false',
   },
 };
