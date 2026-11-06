@@ -5,8 +5,9 @@ name: Voorraadsync Odoo <-> Shopify
 # Merge deze workflow dus naar main voordat de planning actief wordt.
 on:
   schedule:
-    # Elke 30 minuten. Pas aan naar wens; let op je gratis Actions-minuten
-    # bij een private repo (2000 min/maand). '*/15 * * * *' = elke 15 min.
+    # Vangnet: start de lus opnieuw als de keten ooit onderbroken is.
+    # De repo is publiek, dus Actions-minuten zijn onbeperkt. Wordt de repo
+    # privé, dan past deze lus NIET in de gratis 2000 min/maand.
     - cron: '*/30 * * * *'
   workflow_dispatch: {} # knop om handmatig te draaien (Actions-tab > Run workflow)
 
@@ -14,9 +15,14 @@ concurrency:
   group: stock-sync
   cancel-in-progress: false # nooit twee runs tegelijk (vermijdt dubbele boekingen)
 
+permissions:
+  contents: read
+  actions: write # nodig om de volgende lus te starten
+
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 355
     defaults:
       run:
         working-directory: odoo-shopify-connector
@@ -26,8 +32,22 @@ jobs:
         with:
           node-version: '20'
       - run: npm install --omit=dev
-      - name: Sync draaien
-        run: node src/sync-once.js
+      - name: Sync draaien (lus, elke paar minuten)
+        # GitHub voert de cron in de praktijk maar om de paar uur uit.
+        # Daarom draait één run zelf een lus: elke SYNC_INTERVAL_MIN minuten
+        # (standaard 5) een volledige sync, ongeveer 5u30 lang. Daarna start
+        # de run zichzelf opnieuw (stap hieronder). De cron blijft als vangnet.
+        # Stoppen: zet repo-variabele SYNC_LOOP op 'off', of annuleer de run.
+        shell: bash
+        run: |
+          interval=$(( ${SYNC_INTERVAL_MIN:-5} * 60 ))
+          if [ "${SYNC_LOOP}" = "off" ]; then budget=0; else budget=$(( 330 * 60 )); fi
+          end=$(( SECONDS + budget ))
+          while true; do
+            node src/sync-once.js || echo "::warning::sync-run mislukt, volgende poging over ${interval}s"
+            [ $(( SECONDS + interval )) -ge $end ] && break
+            sleep "$interval"
+          done
         env:
           # --- Niet-geheime config (identifiers, geen wachtwoorden) ---
           ODOO_URL: https://ateliermarhaban.odoo.com
@@ -44,3 +64,14 @@ jobs:
           SHOPIFY_CLIENT_SECRET: ${{ secrets.SHOPIFY_CLIENT_SECRET }}
           # Zet DRY_RUN op 'true' (repo variable) om eerst alleen te loggen.
           DRY_RUN: ${{ vars.DRY_RUN }}
+          SYNC_INTERVAL_MIN: ${{ vars.SYNC_INTERVAL_MIN }}
+          SYNC_LOOP: ${{ vars.SYNC_LOOP }}
+      - name: Volgende lus starten
+        # workflow_dispatch met GITHUB_TOKEN start wel degelijk een nieuwe run.
+        # Door de concurrency-groep staat die in de wachtrij tot deze run klaar is.
+        if: ${{ !cancelled() && vars.SYNC_LOOP != 'off' }}
+        working-directory: .
+        run: gh workflow run stock-sync.yml --ref main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
