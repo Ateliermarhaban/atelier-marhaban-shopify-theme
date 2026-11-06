@@ -179,6 +179,7 @@ Parameters:
               {%- if show_price -%}
                 <div class="product-price product-price--block">
                   {%- render 'price', product: product, show_currency_code: settings.product_currency_code_enabled, show_labels: true -%}
+                  {%- if product.template_suffix == 'zelliges' or product.template_suffix == 'bejmats' -%}<span class="product-price__unit"> / m²</span>{%- endif -%}
                 </div>
               {%- endif -%}
             </a>
