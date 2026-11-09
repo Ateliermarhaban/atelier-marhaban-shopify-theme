@@ -1,0 +1,63 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "0f8b401b-5cfa-4f9f-a2dc-786281b2e781": {
+      "type": "main-page",
+      "settings": {
+        "show_page_title": true,
+        "full_width": false
+      }
+    },
+    "forms": {
+      "type": "apps",
+      "blocks": {
+        "d513bd11-bcda-4922-9711-67882faaf183": {
+          "type": "shopify://apps/forms/blocks/inline/8744a304-fcb1-4347-b211-bb6b4759a76a",
+          "settings": {
+            "form_id": "1216866",
+            "text_color": "#202020",
+            "button_background_color": "#202020",
+            "button_label_color": "#ffffff",
+            "links_color": "#1878b9",
+            "errors_color": "#e02229",
+            "text_alignment": "center",
+            "form_alignment": "center",
+            "padding_top": 0,
+            "padding_bottom": 24,
+            "padding_right": 0,
+            "padding_left": 0
+          }
+        }
+      },
+      "block_order": [
+        "d513bd11-bcda-4922-9711-67882faaf183"
+      ],
+      "settings": {
+        "full_width": false,
+        "show_space": true
+      }
+    },
+    "custom_liquid_63q4aG": {
+      "type": "custom-liquid",
+      "name": "Custom Liquid",
+      "settings": {
+        "full_width": true,
+        "show_space": false,
+        "code": "<style>pop-up, .cc-pop-up { display: none !important; }</style><script>/* Nieuwsbriefpopup niet tonen op het klantgegevensformulier */ new MutationObserver(function (m, o) { var p = document.querySelector('pop-up'); if (p) { p.remove(); o.disconnect(); } }).observe(document.documentElement, { childList: true, subtree: true });</script>"
+      }
+    }
+  },
+  "order": [
+    "0f8b401b-5cfa-4f9f-a2dc-786281b2e781",
+    "forms",
+    "custom_liquid_63q4aG"
+  ]
+}

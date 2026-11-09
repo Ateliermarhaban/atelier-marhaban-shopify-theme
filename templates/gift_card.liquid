@@ -1,98 +1,165 @@
+{%- comment -%}
+  Atelier Marhaban: cadeaubon (digitaal + afdrukbaar op A5).
+  Vervangt de standaard Symmetry gift_card.liquid.
+  Vereiste assets in /assets: am-logo-beige.svg, am-embleem-groen.svg
+  Slogan aanpassen: wijzig de assign hieronder.
+{%- endcomment -%}
 {%- liquid
   layout none
-  assign rtl = false
-  assign rtl_iso_codes = 'ar,arc,dv,fa,ha,he,khw,ks,ku,ps,ur,yi' | split: ','
-  assign current_lang = localization.language.iso_code | split: '-' | first
-
-  if rtl_iso_codes contains current_lang
-    assign rtl = true
-  endif
+  assign slogan = 'Met de hand gemaakt.<br>Door jou gekozen.'
+  assign formatted_initial_value = gift_card.initial_value | money_without_trailing_zeros | strip_html
 -%}
-
 <!doctype html>
-<html lang="{{ request.locale.iso_code }}" dir="{% if rtl %}rtl{% else %}ltr{% endif %}">
+<html lang="{{ request.locale.iso_code }}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-
-  {%- assign formatted_initial_value = gift_card.initial_value | money_without_trailing_zeros | strip_html %}
-  <title>{{ 'gift_cards.issued.title' | t: value: formatted_initial_value, shop: shop.name }}</title>
-
+  <meta name="robots" content="noindex">
+  <title>Cadeaubon van {{ formatted_initial_value }} | {{ shop.name }}</title>
   {%- if settings.favicon != blank -%}
-    {%- liquid
-      assign image_type = settings.favicon | split: '?' | first | split: '.' | last | downcase
-      if image_type == 'svg'
-        assign image_type = 'svg+xml'
-      endif
-    -%}
-    <link rel="icon" href="{{ settings.favicon | image_url: width: 48, height: 48 }}" type="image/{{ image_type }}">
+    <link rel="icon" href="{{ settings.favicon | image_url: width: 48, height: 48 }}">
   {%- endif -%}
-
-  <meta name="description" content="{{ 'gift_cards.issued.subtext' | t }}">
-
-
-  {%- liquid
-    assign base_font = settings.type_base_font
-    assign base_font_bold = base_font | font_modify: 'weight', 'bolder'
-    assign heading_font = settings.type_heading_font
-  -%}
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant:wght@300;400&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer></script>
+  {{ content_for_header }}
 
   <style>
-    {{- base_font | font_face: font_display: 'fallback' -}}
-    {{- base_font_bold | font_face: font_display: 'fallback' -}}
-    {{- heading_font | font_face: font_display: 'fallback' -}}
+    :root {
+      --groen: #5e7361; --terracotta: #ba6a55; --beige: #dec8b8;
+      --wit: #f5f1e8; --grijs: #5c5c5c; --zwart: #2e2e2e; --lijn: #b9a99b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: "Nunito Sans", sans-serif; font-weight: 400; color: var(--zwart);
+           background: #e9e2d6; line-height: 1.5; padding: 32px 16px 48px; }
+    .sheets { display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; }
+    .sheet { width: 100%; max-width: 420px; aspect-ratio: 148 / 210; position: relative;
+             box-shadow: 0 2px 18px rgba(46,46,46,.12); container-type: inline-size; }
 
-    {%- render 'doc-head-styles' -%}
+    /* Voorkant */
+    .front { height: 100%; background: var(--groen); color: var(--beige); text-align: center;
+             display: flex; flex-direction: column; align-items: center; padding: 11cqw; }
+    .front .logo { width: 57cqw; margin-top: 22cqw; }
+    .front .slogan { font-family: "Cormorant", serif; font-weight: 300; font-size: 6.2cqw;
+                     line-height: 1.25; margin-top: 20cqw; }
+    .front .rule { width: 8cqw; height: 2px; background: var(--terracotta); margin-top: 6cqw; }
+    .front .label { margin-top: auto; font-weight: 600; font-size: 2.1cqw; letter-spacing: .3em; }
+
+    /* Achterkant */
+    .back { height: 100%; background: var(--wit); padding: 11cqw; display: flex; flex-direction: column; }
+    .back .head { display: flex; justify-content: space-between; align-items: center; }
+    .back h1 { font-family: "Cormorant", serif; font-weight: 300; font-size: 8cqw; color: var(--groen); line-height: 1; }
+    .back .emb { width: 7.5cqw; }
+    .lbl { font-weight: 600; font-size: 1.9cqw; letter-spacing: .2em; color: var(--groen);
+           text-transform: uppercase; margin-bottom: 1.2cqw; }
+    .block { margin-top: 6cqw; }
+    .val { font-size: 3.2cqw; }
+    .msg { font-family: "Cormorant", serif; font-weight: 400; font-size: 4.6cqw; line-height: 1.4;
+           color: var(--zwart); white-space: pre-line; }
+    .amount { font-family: "Cormorant", serif; font-weight: 300; font-size: 11cqw; color: var(--groen); line-height: 1; }
+    .row { display: flex; gap: 6cqw; align-items: flex-end; }
+    .code-box { display: flex; align-items: center; gap: 4cqw; background: #fff;
+                border: 1.5px solid var(--groen); border-radius: 4px; padding: 3cqw 4cqw; }
+    .code { font-size: 4cqw; font-weight: 600; letter-spacing: .12em; flex: 1; word-break: break-all; }
+    .qr img, .qr canvas { width: 16cqw !important; height: 16cqw !important; display: block; }
+    .note { font-size: 2.2cqw; color: var(--grijs); margin-top: 1.2cqw; }
+    .how { margin-top: auto; border-top: 1px solid var(--lijn); padding-top: 3cqw;
+           font-size: 2.3cqw; color: var(--grijs); line-height: 1.55; }
+    .how b { font-weight: 600; color: var(--zwart); }
+
+    .actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; margin-top: 28px; }
+    .btn { font: 600 14px/1 "Nunito Sans", sans-serif; letter-spacing: .08em; padding: 14px 22px;
+           border-radius: 2px; cursor: pointer; text-decoration: none; border: 1.5px solid var(--groen); }
+    .btn--primary { background: var(--groen); color: var(--wit); }
+    .btn--secondary { background: transparent; color: var(--groen); }
+    .wallet { display: flex; justify-content: center; margin-top: 16px; }
+
+    @media print {
+      @page { size: A5; margin: 0; }
+      * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      body { background: none; padding: 0; }
+      .sheets { display: block; }
+      .sheet { width: 148mm; height: 210mm; max-width: none; aspect-ratio: auto; box-shadow: none;
+               page-break-after: always; break-after: page; }
+      .sheet:last-child { page-break-after: auto; break-after: auto; }
+      .actions, .wallet { display: none; }
+    }
   </style>
-
-  {%- unless base_font.system? -%}
-    <link rel="preload" as="font" href="{{ base_font | font_url }}" type="font/woff2" crossorigin>
-  {%- endunless -%}
-
-  {%- unless heading_font.system? -%}
-    <link rel="preload" as="font" href="{{ heading_font | font_url }}" type="font/woff2" crossorigin>
-  {%- endunless -%}
-
-  <link rel="stylesheet" href="{{ 'gift-card.css' | asset_url }}">
-  <script src="{{ 'vendor/qrcode.js' | shopify_asset_url }}" defer></script>
-
-  {{ content_for_header }}
 </head>
 
 <body>
-  <header class="header">
-    <span class="header__store-name h4">{{ shop.name }}</span>
-    <h1 class="h3">{{ 'gift_cards.issued.subtext' | t }}</h1>
-    <div class="header__value h4">
-      <p>
-        {%- if settings.currency_code_enabled -%}
-          {{ gift_card.initial_value | money_with_currency }}
-        {%- else -%}
-          {{ gift_card.initial_value | money }}
-        {%- endif -%}
-      </p>
-      {%- if gift_card.enabled == false or gift_card.expired -%}
-        {%- assign gift_card_expiry_date = gift_card.expires_on | date: "%d/%m/%y" -%}
-        <p>
-          {{- 'gift_cards.issued.expired' | t: expiry: gift_card_expiry_date -}}
-        </p>
+  <div class="sheets">
+    <section class="sheet" aria-label="Voorkant"><div class="front">
+      <img class="logo" src="{{ 'am-logo-beige.svg' | asset_url }}" alt="{{ shop.name }}">
+      <p class="slogan">{{ slogan }}</p>
+      <div class="rule"></div>
+      <p class="label">CADEAUBON</p>
+    </div></section>
+
+    <section class="sheet" aria-label="Achterkant"><div class="back">
+      <div class="head">
+        <h1>Cadeaubon</h1>
+        <img class="emb" src="{{ 'am-embleem-groen.svg' | asset_url }}" alt="">
+      </div>
+
+      {%- if gift_card.recipient and gift_card.recipient.name != blank -%}
+        <div class="block"><p class="lbl">Voor</p><p class="val">{{ gift_card.recipient.name | escape }}</p></div>
       {%- endif -%}
+
+      {%- if gift_card.message != blank -%}
+        <div class="block"><p class="lbl">Boodschap</p><p class="msg">{{ gift_card.message | escape }}</p></div>
+      {%- endif -%}
+
+      <div class="block row">
+        <div>
+          <p class="lbl">Waarde</p>
+          <p class="amount">{{ gift_card.initial_value | money_without_trailing_zeros }}</p>
+        </div>
+        {%- if gift_card.expires_on -%}
+          <div><p class="lbl">Geldig tot</p><p class="val">{{ gift_card.expires_on | date: '%d/%m/%Y' }}</p></div>
+        {%- endif -%}
+      </div>
+
+      {%- if gift_card.enabled == false or gift_card.expired -%}
+        <p class="note">Deze cadeaubon is niet meer geldig.</p>
+      {%- elsif gift_card.balance != gift_card.initial_value -%}
+        <p class="note">Nog te besteden: {{ gift_card.balance | money }}</p>
+      {%- endif -%}
+
+      <div class="block">
+        <p class="lbl">Code</p>
+        <div class="code-box">
+          <span class="code">{{ gift_card.code | format_code }}</span>
+          <div class="qr" data-identifier="{{ gift_card.qr_identifier }}"></div>
+        </div>
+      </div>
+
+      <div class="how">
+        <b>Online</b>: vul de code in bij het afrekenen op www.atelier-marhaban.com.<br>
+        <b>In de showroom</b>: toon de code bij het afrekenen. Afspraak via +32 9 367 06 69 of info@atelier-marhaban.com.<br>
+        De bon is meermaals te gebruiken tot het bedrag op is. Niet inwisselbaar voor geld.
+      </div>
+    </div></section>
+  </div>
+
+  <div class="actions">
+    <button class="btn btn--primary" onclick="window.print();">Afdrukken op A5</button>
+    <a class="btn btn--secondary" href="{{ shop.url }}">Naar de webshop</a>
+  </div>
+  {%- if gift_card.pass_url -%}
+    <div class="wallet">
+      <a href="{{ gift_card.pass_url }}"><img src="{{ 'gift-card/add-to-apple-wallet.svg' | shopify_asset_url }}" width="120" height="40" alt="Aan Apple Wallet toevoegen"></a>
     </div>
+  {%- endif -%}
 
-    {%- liquid
-      if settings.currency_code_enabled
-        assign gift_card_balance = gift_card.balance | money_with_currency
-      else
-        assign gift_card_balance = gift_card.balance | money
-      endif
-    -%}
-    {%- if gift_card.balance != gift_card.initial_value -%}
-      <p>{{ 'gift_cards.issued.remaining_html' | t: balance: gift_card_balance }}</p>
-    {%- endif -%}
-  </header>
-
-  <main class="gift-card">
-    {% section 'main-gift-card' %}
-  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var el = document.querySelector('.qr');
+      if (el && window.QRCode) {
+        new QRCode(el, { text: el.dataset.identifier, width: 160, height: 160, imageAltText: 'QR-code van de cadeaubon' });
+      }
+    });
+  </script>
 </body>
 </html>

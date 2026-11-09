@@ -1,0 +1,124 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-product",
+      "blocks": {
+        "title": {
+          "type": "title",
+          "settings": {}
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "show_in_tab": false,
+            "open_tab": false,
+            "icon": "",
+            "show_in_quickbuy": false
+          }
+        },
+        "divider": {
+          "type": "divider",
+          "settings": {
+            "show_in_quickbuy": false
+          }
+        },
+        "boodschap_keuze": {
+          "type": "custom-option",
+          "settings": {
+            "label": "Boodschap",
+            "type": "multiple",
+            "text_required": false,
+            "checkbox_checked_value": "Ja",
+            "checkbox_unchecked_value": "Nee",
+            "multiple_style": "radio",
+            "multiple_options": "Ik schrijf de boodschap zelf\nSchrijf mijn boodschap op de kaart"
+          }
+        },
+        "boodschap_tekst": {
+          "type": "custom-option",
+          "settings": {
+            "label": "Boodschap voor op de kaart",
+            "type": "textarea",
+            "text_required": false,
+            "checkbox_checked_value": "Ja",
+            "checkbox_unchecked_value": "Nee",
+            "multiple_style": "radio",
+            "multiple_options": ""
+          }
+        },
+        "buy-buttons": {
+          "type": "buy-buttons",
+          "settings": {
+            "show_quantity_selector": false,
+            "enable_payment_button": false,
+            "show_backorder_text": true,
+            "show_pickup_availability": false,
+            "show_gift_card_recipient": false
+          }
+        },
+        "price": {
+          "type": "price",
+          "settings": {
+            "show_tax_and_shipping": false,
+            "enable_product_reviews_by_price": true
+          }
+        },
+        "variant-picker": {
+          "type": "variant-picker",
+          "settings": {
+            "show_single": false,
+            "selector_style": "listed",
+            "dynamic_availability": "show",
+            "enable_size_chart": false,
+            "size_chart_label": "Size guide",
+            "size_chart_variant": "Size",
+            "size_chart_page": ""
+          }
+        }
+      },
+      "block_order": [
+        "title",
+        "price",
+        "description",
+        "divider",
+        "variant-picker",
+        "boodschap_keuze",
+        "boodschap_tekst",
+        "buy-buttons"
+      ],
+      "settings": {
+        "show_breadcrumbs": true,
+        "select_first_variant": true,
+        "show_location_underneath": false,
+        "inventory_transfers_enable": true,
+        "enable_sticky_columns": false,
+        "enable_sticky_atc": false,
+        "sticky_atc_position": "end",
+        "sticky_atc_mobile": true,
+        "sticky_atc_behavior": "add_to_cart",
+        "sticky_atc_button_style": "secondary",
+        "gallery_size": "large",
+        "gallery_layout": "carousel-under",
+        "enable_zoom": false,
+        "show_alt_text": true,
+        "alt_text_icon": "price_tag",
+        "enable_video_autoplay": false,
+        "enable_video_looping": false,
+        "enable_media_grouping": true,
+        "media_grouping_option": "Color,Colour,Couleur,Farbe"
+      }
+    }
+  },
+  "order": [
+    "main"
+  ]
+}
