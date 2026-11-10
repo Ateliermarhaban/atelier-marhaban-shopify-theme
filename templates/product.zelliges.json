@@ -36,7 +36,7 @@
           "settings": {
             "show_single": false,
             "selector_style": "listed",
-            "dynamic_availability": "show",
+            "dynamic_availability": "prune",
             "enable_size_chart": false,
             "size_chart_label": "Size guide",
             "size_chart_variant": "Size",
@@ -138,7 +138,7 @@
         "sticky_atc_mobile": true,
         "sticky_atc_behavior": "add_to_cart",
         "sticky_atc_button_style": "secondary",
-        "gallery_size": "medium",
+        "gallery_size": "small",
         "gallery_layout": "carousel-under",
         "enable_zoom": true,
         "show_alt_text": false,
