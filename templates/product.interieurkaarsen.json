@@ -128,7 +128,7 @@
         "gallery_size": "small",
         "gallery_layout": "carousel-under",
         "enable_zoom": true,
-        "show_alt_text": true,
+        "show_alt_text": false,
         "alt_text_icon": "price_tag",
         "enable_video_autoplay": false,
         "enable_video_looping": false,
