@@ -1,1 +1,104 @@
-{"sections":{"main":{"type":"main-collection","settings":{"show_title":false,"show_image_behind_heading":false,"heading_image_height":"medium","overlay_style":"shadow","coll_desc_pos":"below","coll_num_per_page_int":50,"grid":5,"show_vendor":false,"show_total":false,"enable_filtering":false,"collapse_tag_sidebar_by_default":true,"collapse_filters_method":"none","show_filter_counts":false,"filter_two_columns":false,"button_grid_filter_name":"Size,Taille,Größe","auto_apply_hide_unavailable":false,"enable_sticky_filter":true,"show_sort":false,"sort_show_featured":false,"sort_show_best":true,"sort_show_alpha":true,"sort_show_price":true,"sort_show_date":true,"related_collections":[],"related_collections_style":"buttons","rel_coll_gall_aspect_ratio":"1","image_position":"center center","rel_coll_gall_enable_margin":true,"rel_coll_gall_full_width":false,"rel_coll_gall_overlay_style":"shadow","rel_coll_gall_text_alignment":"center center","rel_coll_grid_mobile":"2"}},"collapsible_tabs_TKAhxY":{"type":"collapsible-tabs","blocks":{"question_CJC4Gg":{"type":"question","settings":{"title":"Question","answer":"<p>Answer<\/p>"}},"question_gGKA7U":{"type":"question","settings":{"title":"Question","answer":"<p>Answer<\/p>"}}},"block_order":["question_CJC4Gg","question_gGKA7U"],"disabled":true,"name":"Collapsible tabs","settings":{"title":"Collapsible tabs"}}},"order":["main","collapsible_tabs_TKAhxY"]}
+{
+  "sections": {
+    "main": {
+      "type": "main-collection",
+      "settings": {
+        "show_title": true,
+        "show_image_behind_heading": false,
+        "heading_image_height": "medium",
+        "overlay_style": "shadow",
+        "coll_desc_pos": "above",
+        "coll_num_per_page_int": 50,
+        "grid": 5,
+        "show_vendor": false,
+        "show_total": false,
+        "enable_filtering": false,
+        "collapse_tag_sidebar_by_default": true,
+        "collapse_filters_method": "none",
+        "show_filter_counts": false,
+        "filter_two_columns": false,
+        "button_grid_filter_name": "Size,Taille,Größe",
+        "auto_apply_hide_unavailable": false,
+        "enable_sticky_filter": true,
+        "show_sort": false,
+        "sort_show_featured": false,
+        "sort_show_best": true,
+        "sort_show_alpha": true,
+        "sort_show_price": true,
+        "sort_show_date": true,
+        "related_collections": [],
+        "related_collections_style": "buttons",
+        "rel_coll_gall_aspect_ratio": "1",
+        "image_position": "center center",
+        "rel_coll_gall_enable_margin": true,
+        "rel_coll_gall_full_width": false,
+        "rel_coll_gall_overlay_style": "shadow",
+        "rel_coll_gall_text_alignment": "center center",
+        "rel_coll_grid_mobile": "2"
+      }
+    },
+    "collapsible_tabs_TKAhxY": {
+      "type": "collapsible-tabs",
+      "blocks": {
+        "vraag_1": {
+          "type": "question",
+          "settings": {
+            "title": "Waarom kost een kaars van Atelier Marhaban meer dan een gewone geurkaars?",
+            "answer": "<p>Om drie redenen: sojawas in plaats van paraffine, een wiek van zuiver katoen, en een omhulsel dat volledig met de hand wordt gemaakt en beschilderd, geweven of bekleed.</p>"
+          }
+        },
+        "vraag_2": {
+          "type": "question",
+          "settings": {
+            "title": "Wat doe ik met het omhulsel als de kaars op is?",
+            "answer": "<p>Dat blijft over, als pot, vaas, ei of doos. Haal de laatste centimeter was eruit met warm water en het omhulsel krijgt een tweede leven.</p>"
+          }
+        },
+        "vraag_3": {
+          "type": "question",
+          "settings": {
+            "title": "Welke geuren zijn er?",
+            "answer": "<p>Bij elke kaars zie je welke geuren op voorraad zijn. Het gamma loopt van oud en oranjebloesem tot dadel en honing, vijg en munt of groene thee.</p>"
+          }
+        },
+        "vraag_4": {
+          "type": "question",
+          "settings": {
+            "title": "Waar worden de kaarsen gemaakt?",
+            "answer": "<p>In Marrakech, Marokko. De materialen van het omhulsel komen uit verschillende streken: leder uit Fès, aardewerk uit Tamegroute, weefsel uit onder meer Khénifra.</p>"
+          }
+        },
+        "vraag_5": {
+          "type": "question",
+          "settings": {
+            "title": "Hoe brand ik de kaars veilig?",
+            "answer": "<p>Laat een kaars nooit onbewaakt branden en doof ze wanneer er nog een centimeter was in de pot staat. Bij leder, raffia of weefsel rond het glas is dat extra belangrijk.</p>"
+          }
+        },
+        "vraag_6": {
+          "type": "question",
+          "settings": {
+            "title": "Kan ik grotere aantallen bestellen voor een project of winkel?",
+            "answer": "<p>Ja. Interieurarchitecten, hotels en winkels kunnen grotere aantallen en grote formaten op aanvraag bestellen. <a href=\"/pages/contact\">Neem contact op</a> met Atelier Marhaban in Drongen (Gent).</p>"
+          }
+        }
+      },
+      "block_order": [
+        "vraag_1",
+        "vraag_2",
+        "vraag_3",
+        "vraag_4",
+        "vraag_5",
+        "vraag_6"
+      ],
+      "name": "Veelgestelde vragen",
+      "settings": {
+        "title": "Veelgestelde vragen"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "collapsible_tabs_TKAhxY"
+  ]
+}
