@@ -384,20 +384,10 @@
         "image_position": "left",
         "segment_position": "over-text"
       }
-    },
-    "vormen": {
-      "type": "custom-liquid",
-      "name": "Kies een vorm",
-      "settings": {
-        "full_width": false,
-        "show_space": true,
-        "code": "{%- liquid\n  assign vormen = 'vierkante-zelliges|Vierkant|10 × 10 cm,zelliges-rechthoek|Rechthoek|10 × 3,5 cm,hexa|Hexa|10,3 × 9 cm,zelliges-trapezium|Trapezium|10 × 3,5 cm,zelliges-scala|Scala|12 × 11 cm' | split: ','\n  assign zichtbaar = 0\n  for v in vormen\n    assign d = v | split: '|'\n    if collections[d[0]].products_count > 0\n      assign zichtbaar = zichtbaar | plus: 1\n    endif\n  endfor\n-%}\n{%- if zichtbaar > 1 -%}\n<div class=\"container am-vormen\">\n  <h2 class=\"am-vormen__titel\">Kies een vorm</h2>\n  <div class=\"am-vormen__rij\">\n    {%- for v in vormen -%}\n      {%- assign d = v | split: '|' -%}\n      {%- assign c = collections[d[0]] -%}\n      {%- if c.products_count > 0 -%}\n        {%- assign img = c.image | default: c.products.first.featured_media.preview_image -%}\n        <a class=\"am-vorm\" href=\"{{ c.url }}\">\n          {%- if img -%}{{ img | image_url: width: 400 | image_tag: loading: 'lazy', class: 'am-vorm__img', alt: d[1] }}{%- endif -%}\n          <span class=\"am-vorm__naam\">{{ d[1] }}</span>\n          <span class=\"am-vorm__maat\">{{ d[2] }}</span>\n        </a>\n      {%- endif -%}\n    {%- endfor -%}\n  </div>\n</div>\n<style>\n  .am-vormen { text-align:center; }\n  .am-vormen__titel { margin-bottom:24px; }\n  .am-vormen__rij { display:flex; justify-content:center; gap:24px; flex-wrap:wrap; }\n  .am-vorm { width:160px; text-decoration:none; color:inherit; }\n  .am-vorm__img { width:160px; height:160px; object-fit:cover; display:block; margin-bottom:10px; }\n  .am-vorm__naam { display:block; font-weight:600; }\n  .am-vorm__maat { display:block; font-size:0.85rem; opacity:0.75; }\n  @media (max-width:767px){ .am-vorm, .am-vorm__img { width:130px; } .am-vorm__img { height:130px; } }\n</style>\n{%- endif -%}\n"
-      }
     }
   },
   "order": [
     "rich_text_d4YttQ",
-    "vormen",
     "main",
     "background_video_FrXbUM",
     "image_with_text_qi3e7T",
