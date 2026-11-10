@@ -27,7 +27,7 @@
             "text": "<p>Zelliges, potten en geurkaarsen uit de ateliers van Marrakech. Ik ga er zelf naartoe en kies elk stuk.</p>",
             "enlarge_text": false,
             "button_label_1": "Naar de shop",
-            "button_url_1": "shopify://collections/all",
+            "button_url_1": "shopify://pages/shop",
             "button_label_2": "Voor professionals",
             "button_url_2": "shopify://pages/professionals",
             "text_alignment": "bottom left"
@@ -87,17 +87,6 @@
             "link": "shopify://collections/geurkaarsen-1"
           }
         },
-        "tegel_potten": {
-          "type": "text_block",
-          "settings": {
-            "enable_media": true,
-            "image": "shopify://shop_images/am-home-tegel-potten.jpg",
-            "title": "Potten",
-            "text": "<p>Handgedraaid in Marrakech, in email, tadelakt of naturel.</p>",
-            "button_label": "Bekijk de potten",
-            "link": "/collections/potten"
-          }
-        },
         "tegel_zelliges": {
           "type": "text_block",
           "settings": {
@@ -119,12 +108,23 @@
             "button_label": "Kies een bedrag",
             "link": "shopify://products/cadeaubon"
           }
+        },
+        "tegel_bejmats": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/Bejmat_Naturel_Brut_02_kopie.jpg",
+            "title": "Bejmats",
+            "text": "<p>Smalle tegels van 14 × 4,5 cm, zonder glazuur. Prijs per m².</p>",
+            "button_label": "Bekijk de bejmats",
+            "link": "shopify://collections/bejmats"
+          }
         }
       },
       "block_order": [
         "tegel_kaarsen",
-        "tegel_potten",
         "tegel_zelliges",
+        "tegel_bejmats",
         "tegel_cadeaubon"
       ],
       "settings": {
