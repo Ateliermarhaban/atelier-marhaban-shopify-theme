@@ -1,1 +1,390 @@
-{"sections":{"main":{"type":"main-page","disabled":true,"settings":{"show_page_title":true,"full_width":true}},"image_with_text_overlay_PegaLt":{"type":"image-with-text-overlay","blocks":{"subheading_xpW3Kx":{"type":"subheading","settings":{"subheading":"Voor architecten, winkels en tegelhandels"}},"heading_fjCkED":{"type":"heading","settings":{"title":"Je eigen prijzen, in je eigen webshop.","heading_max_width":40,"title_size":50,"title_size_mobile":32,"use_h1":false}},"text_yTtVe6":{"type":"text","settings":{"text":"<p>Professionals bestellen bij Atelier Marhaban in een afgeschermde webshop, met nettoprijzen excl. btw en het volledige gamma.<\/p>","enlarge_text":true}},"button_hero":{"type":"button","settings":{"button_label":"Inloggen","button_link":"https:\/\/pro.atelier-marhaban.com\/web\/login","button_style":"primary"}}},"block_order":["subheading_xpW3Kx","heading_fjCkED","text_yTtVe6","button_hero"],"name":"Image with text overlay","settings":{"image":"shopify:\/\/shop_images\/am-home-potten-overzicht.jpg","mobile_image":"shopify:\/\/shop_images\/am-home-potten-overzicht.jpg","height":"fixed","height_desktop":600,"height_mobile":460,"image_link":"","full_width":true,"text_alignment":"center center","mobile_overlay_under":false,"overlay_style":"shadow"}},"rich_text_FXU4FB":{"type":"rich-text","blocks":{"heading_BDn8mr":{"type":"heading","settings":{"title":"Zo krijg je toegang.","use_h1":false}},"text_FRHEKf":{"type":"text","settings":{"text":"<p><strong>1. Je vraagt een pro-account aan<\/strong><br\/>Met het formulier onderaan deze pagina. Vermeld je btw-nummer en je beroepsgroep.<br\/>-<br\/><strong>2. Ik bekijk elke aanvraag zelf<\/strong><br\/>Je account krijgt de voorwaarden van jouw beroepsgroep: architect, tegelhandel of verdeler, winkel of project.<br\/>-<br\/><strong>3. Je krijgt een uitnodiging per mail<\/strong><br\/>Je kiest een wachtwoord en logt in op pro.atelier-marhaban.com.<\/p>","enlarge_text":false}}},"block_order":["heading_BDn8mr","text_FRHEKf"],"name":"Rich text","settings":{"height":"medium","text_alignment":"center","full_width":false,"color_scheme":"default"}},"image_with_text_EeUQaf":{"type":"image-with-text","blocks":{"heading_kV3JGW":{"type":"heading","settings":{"title":"Stalen en staalborden.","use_h1":false}},"text_JKBjaE":{"type":"text","settings":{"text":"<p>Zelliges bestel je als stalen, los of gekleefd op een zwart staalbord. Zo leg je de echte kleur naast de plannen bij je klant.<\/p>","enlarge_text":false}},"button_VcTbAH":{"type":"button","settings":{"button_label":"Stalen aanvragen","button_link":"shopify:\/\/pages\/contact","button_style":"secondary"}}},"block_order":["heading_kV3JGW","text_JKBjaE","button_VcTbAH"],"name":"Image with text","settings":{"image":"shopify:\/\/shop_images\/P1665677_kopie.jpg","image_width":700,"image_link":"","image_position":"left","text_alignment":"left","color_scheme":"2"}},"rich_text_TWXPEY":{"type":"rich-text","blocks":{"heading_mJghRr":{"type":"heading","settings":{"title":"Technische fiches.","use_h1":false}},"text_39fAAk":{"type":"text","settings":{"text":"<p>Per product: formaten, plaatsing en onderhoud. Voor de zelliges ook de testresultaten van TCKI, onder meer op vorst, thermoshock en zwembadchloor.<\/p>","enlarge_text":false}},"button_c33Va6":{"type":"button","settings":{"button_label":"Technische fiches downloaden","button_link":"","button_style":"primary"}}},"block_order":["heading_mJghRr","text_39fAAk","button_c33Va6"],"name":"Rich text","settings":{"height":"medium","text_alignment":"center","full_width":false,"color_scheme":"default"}},"testimonials_nmAYCw":{"type":"testimonials","blocks":{"testimonial_xnrp8A":{"type":"testimonial","settings":{"star_rating":5,"testimonial":"\u201cVoor de open keuken zochten we een originele achtergrond die tegelijk warm en tijdloos aanvoelt. Atelier Marhaban hielp ons met een unieke maatkleur in zelliges en een karaktervolle pot in tadelakt. Het geeft de ontbijtruimte en lobby meteen de sfeer die we voor ogen hadden.\u201d","author":"Nicolas, Bravosix Interior Design","image_caption":"","link":""}}},"block_order":["testimonial_xnrp8A"],"name":"Testimonials","settings":{"title":"Hotel Prado, Oostende","layout":"no-image","text_caps":false,"quote_text_size":25,"quote_text_size_mobile":15,"image_shape":"square","color_scheme":"2","use_custom_star_rating_color":false,"star_rating_color":"#e9a80a","autoplay":true,"autoplay_speed":5}},"image_with_text_Ng68EQ":{"type":"image-with-text","blocks":{"heading_AWfccr":{"type":"heading","settings":{"title":"Projecten en maatwerk.","use_h1":false}},"text_4WRbpF":{"type":"text","settings":{"text":"<p>Voor een hotel, een restaurant of een maatkleur in zelliges maak ik een offerte per project. Ik denk mee vanaf de eerste schets en zeg eerlijk wat in Marokko haalbaar is en wat niet.<\/p>","enlarge_text":false}},"button_PbTeqM":{"type":"button","settings":{"button_label":"Project bespreken","button_link":"shopify:\/\/pages\/contact","button_style":"secondary"}}},"block_order":["heading_AWfccr","text_4WRbpF","button_PbTeqM"],"name":"Image with text","settings":{"image":"shopify:\/\/shop_images\/am-home-atelier-lievegem.jpg","image_width":700,"image_link":"","image_position":"left","text_alignment":"left","color_scheme":"1"}},"contact_form_jDChLk":{"type":"contact-form","blocks":{"name_input_4Jzr4N":{"type":"name_input","settings":{"half_width":false}},"custom_input_VThMA4":{"type":"custom_input","settings":{"title":"Bedrijfsnaam","type":"text","required":true,"half_width":true}},"email_input_anCde3":{"type":"email_input","settings":{"half_width":true}},"phone_input_DzdpX3":{"type":"phone_input","settings":{"required":true,"half_width":true}},"message_input_hXrCxc":{"type":"message_input","settings":{"half_width":false}},"custom_btw":{"type":"custom_input","settings":{"title":"Btw-nummer","type":"text","required":true,"half_width":true}},"custom_website":{"type":"custom_input","settings":{"title":"Website","type":"text","required":false,"half_width":true}},"custom_groep":{"type":"custom_dropdown","settings":{"title":"Beroepsgroep","multiple_options":"Architect of interieurontwerper\nTegelhandel of verdeler\nWinkel of conceptstore\nHotel, horeca of project\nAndere","half_width":false}}},"block_order":["name_input_4Jzr4N","custom_input_VThMA4","custom_btw","custom_groep","email_input_anCde3","phone_input_DzdpX3","custom_website","message_input_hXrCxc"],"name":"Contact form","settings":{"contact_title":"Pro-account aanvragen","contact_text":"<p>Ik bekijk elke aanvraag zelf. Na goedkeuring krijg je een uitnodiging om in te loggen.<\/p>","color_scheme":"default"}},"rich_text_proshop":{"type":"rich-text","blocks":{"heading_ps":{"type":"heading","settings":{"title":"Wat je in de pro-webshop vindt.","use_h1":false}},"text_ps":{"type":"text","settings":{"text":"<p>Bij elk product staat de adviesprijs naast jouw prijs, zodat je korting per productgroep zichtbaar is.<br\/>Alle prijzen excl. btw. Binnen de EU met een geldig btw-nummer verlegd.<br\/>Het volledige gamma, ook de grote potten die niet in de gewone webshop staan.<br\/>Je bestellingen, leveringen en facturen op \u00e9\u00e9n plek.<\/p>","enlarge_text":false}},"button_ps":{"type":"button","settings":{"button_label":"Naar de pro-webshop","button_link":"https:\/\/pro.atelier-marhaban.com\/shop","button_style":"secondary"}}},"block_order":["heading_ps","text_ps","button_ps"],"name":"Rich text","settings":{"height":"medium","text_alignment":"center","full_width":false,"color_scheme":"2"}}},"order":["main","image_with_text_overlay_PegaLt","rich_text_FXU4FB","rich_text_proshop","image_with_text_EeUQaf","rich_text_TWXPEY","testimonials_nmAYCw","image_with_text_Ng68EQ","contact_form_jDChLk"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "disabled": true,
+      "settings": {
+        "show_page_title": true,
+        "full_width": true
+      }
+    },
+    "image_with_text_overlay_PegaLt": {
+      "type": "image-with-text-overlay",
+      "blocks": {
+        "subheading_xpW3Kx": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "Voor architecten, winkels en tegelhandels"
+          }
+        },
+        "heading_fjCkED": {
+          "type": "heading",
+          "settings": {
+            "title": "Je eigen prijzen, in je eigen webshop.",
+            "heading_max_width": 40,
+            "title_size": 50,
+            "title_size_mobile": 32,
+            "use_h1": false
+          }
+        },
+        "text_yTtVe6": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Professionals bestellen bij Atelier Marhaban in een afgeschermde webshop, met nettoprijzen excl. btw en het volledige gamma.</p>",
+            "enlarge_text": true
+          }
+        },
+        "button_hero": {
+          "type": "button",
+          "settings": {
+            "button_label": "Inloggen",
+            "button_link": "https://pro.atelier-marhaban.com/web/login",
+            "button_style": "primary"
+          }
+        }
+      },
+      "block_order": [
+        "subheading_xpW3Kx",
+        "heading_fjCkED",
+        "text_yTtVe6",
+        "button_hero"
+      ],
+      "name": "Image with text overlay",
+      "settings": {
+        "image": "shopify://shop_images/am-home-potten-overzicht.jpg",
+        "mobile_image": "shopify://shop_images/am-home-potten-overzicht.jpg",
+        "height": "fixed",
+        "height_desktop": 600,
+        "height_mobile": 460,
+        "image_link": "",
+        "full_width": true,
+        "text_alignment": "center center",
+        "mobile_overlay_under": false,
+        "overlay_style": "shadow"
+      }
+    },
+    "rich_text_FXU4FB": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_BDn8mr": {
+          "type": "heading",
+          "settings": {
+            "title": "Zo krijg je toegang.",
+            "use_h1": false
+          }
+        },
+        "text_FRHEKf": {
+          "type": "text",
+          "settings": {
+            "text": "<p><strong>1. Je vraagt een pro-account aan</strong><br/>Met het formulier onderaan deze pagina. Vermeld je btw-nummer en je beroepsgroep.<br/>-<br/><strong>2. Ik bekijk elke aanvraag zelf</strong><br/>Je account krijgt de voorwaarden van jouw beroepsgroep: architect, tegelhandel of verdeler, winkel of project.<br/>-<br/><strong>3. Je krijgt een uitnodiging per mail</strong><br/>Je kiest een wachtwoord en logt in op pro.atelier-marhaban.com.</p>",
+            "enlarge_text": false
+          }
+        }
+      },
+      "block_order": [
+        "heading_BDn8mr",
+        "text_FRHEKf"
+      ],
+      "name": "Rich text",
+      "settings": {
+        "height": "medium",
+        "text_alignment": "center",
+        "full_width": false,
+        "color_scheme": "default"
+      }
+    },
+    "image_with_text_EeUQaf": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading_kV3JGW": {
+          "type": "heading",
+          "settings": {
+            "title": "Stalen en staalborden.",
+            "use_h1": false
+          }
+        },
+        "text_JKBjaE": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Zelliges bestel je als stalen, los of gekleefd op een zwart staalbord. Zo leg je de echte kleur naast de plannen bij je klant.</p>",
+            "enlarge_text": false
+          }
+        },
+        "button_VcTbAH": {
+          "type": "button",
+          "settings": {
+            "button_label": "Stalen aanvragen",
+            "button_link": "shopify://pages/contact",
+            "button_style": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "heading_kV3JGW",
+        "text_JKBjaE",
+        "button_VcTbAH"
+      ],
+      "name": "Image with text",
+      "settings": {
+        "image": "shopify://shop_images/P1665677_kopie.jpg",
+        "image_width": 700,
+        "image_link": "",
+        "image_position": "left",
+        "text_alignment": "left",
+        "color_scheme": "2"
+      }
+    },
+    "rich_text_TWXPEY": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_mJghRr": {
+          "type": "heading",
+          "settings": {
+            "title": "Technische fiches.",
+            "use_h1": false
+          }
+        },
+        "text_39fAAk": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Per product: formaten, plaatsing en onderhoud. Voor de zelliges ook de testresultaten van TCKI, onder meer op vorst, thermoshock en zwembadchloor.</p>",
+            "enlarge_text": false
+          }
+        },
+        "button_c33Va6": {
+          "type": "button",
+          "settings": {
+            "button_label": "Technische fiches downloaden",
+            "button_link": "",
+            "button_style": "primary"
+          }
+        }
+      },
+      "block_order": [
+        "heading_mJghRr",
+        "text_39fAAk",
+        "button_c33Va6"
+      ],
+      "name": "Rich text",
+      "settings": {
+        "height": "medium",
+        "text_alignment": "center",
+        "full_width": false,
+        "color_scheme": "default"
+      }
+    },
+    "testimonials_nmAYCw": {
+      "type": "testimonials",
+      "blocks": {
+        "testimonial_xnrp8A": {
+          "type": "testimonial",
+          "settings": {
+            "star_rating": 5,
+            "testimonial": "“Voor de open keuken zochten we een originele achtergrond die tegelijk warm en tijdloos aanvoelt. Atelier Marhaban hielp ons met een unieke maatkleur in zelliges en een karaktervolle pot in tadelakt. Het geeft de ontbijtruimte en lobby meteen de sfeer die we voor ogen hadden.”",
+            "author": "Nicolas, Bravosix Interior Design",
+            "image_caption": "",
+            "link": ""
+          }
+        }
+      },
+      "block_order": [
+        "testimonial_xnrp8A"
+      ],
+      "name": "Testimonials",
+      "settings": {
+        "title": "Hotel Prado, Oostende",
+        "layout": "no-image",
+        "text_caps": false,
+        "quote_text_size": 25,
+        "quote_text_size_mobile": 15,
+        "image_shape": "square",
+        "color_scheme": "2",
+        "use_custom_star_rating_color": false,
+        "star_rating_color": "#e9a80a",
+        "autoplay": true,
+        "autoplay_speed": 5
+      }
+    },
+    "image_with_text_Ng68EQ": {
+      "type": "image-with-text",
+      "blocks": {
+        "heading_AWfccr": {
+          "type": "heading",
+          "settings": {
+            "title": "Projecten en maatwerk.",
+            "use_h1": false
+          }
+        },
+        "text_4WRbpF": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Voor een hotel, een restaurant of een maatkleur in zelliges maak ik een offerte per project. Ik denk mee vanaf de eerste schets en zeg eerlijk wat in Marokko haalbaar is en wat niet.</p>",
+            "enlarge_text": false
+          }
+        },
+        "button_PbTeqM": {
+          "type": "button",
+          "settings": {
+            "button_label": "Project bespreken",
+            "button_link": "shopify://pages/contact",
+            "button_style": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "heading_AWfccr",
+        "text_4WRbpF",
+        "button_PbTeqM"
+      ],
+      "name": "Image with text",
+      "settings": {
+        "image": "shopify://shop_images/am-home-atelier-lievegem.jpg",
+        "image_width": 700,
+        "image_link": "",
+        "image_position": "left",
+        "text_alignment": "left",
+        "color_scheme": "1"
+      }
+    },
+    "contact_form_jDChLk": {
+      "type": "contact-form",
+      "blocks": {
+        "name_input_4Jzr4N": {
+          "type": "name_input",
+          "settings": {
+            "half_width": false
+          }
+        },
+        "custom_input_VThMA4": {
+          "type": "custom_input",
+          "settings": {
+            "title": "Bedrijfsnaam",
+            "type": "text",
+            "required": true,
+            "half_width": true
+          }
+        },
+        "email_input_anCde3": {
+          "type": "email_input",
+          "settings": {
+            "half_width": true
+          }
+        },
+        "phone_input_DzdpX3": {
+          "type": "phone_input",
+          "settings": {
+            "required": true,
+            "half_width": true
+          }
+        },
+        "message_input_hXrCxc": {
+          "type": "message_input",
+          "settings": {
+            "half_width": false
+          }
+        },
+        "custom_btw": {
+          "type": "custom_input",
+          "settings": {
+            "title": "Btw-nummer",
+            "type": "text",
+            "required": true,
+            "half_width": true
+          }
+        },
+        "custom_website": {
+          "type": "custom_input",
+          "settings": {
+            "title": "Website",
+            "type": "text",
+            "required": false,
+            "half_width": true
+          }
+        },
+        "custom_groep": {
+          "type": "custom_dropdown",
+          "settings": {
+            "title": "Beroepsgroep",
+            "multiple_options": "Architect of interieurontwerper\nTegelhandel of verdeler\nWinkel of conceptstore\nHotel, horeca of project\nAndere",
+            "half_width": false
+          }
+        }
+      },
+      "block_order": [
+        "name_input_4Jzr4N",
+        "custom_input_VThMA4",
+        "custom_btw",
+        "custom_groep",
+        "email_input_anCde3",
+        "phone_input_DzdpX3",
+        "custom_website",
+        "message_input_hXrCxc"
+      ],
+      "name": "Contact form",
+      "settings": {
+        "contact_title": "Pro-account aanvragen",
+        "contact_text": "<p>Ik bekijk elke aanvraag zelf. Na goedkeuring krijg je een uitnodiging om in te loggen.</p>",
+        "color_scheme": "default"
+      }
+    },
+    "rich_text_proshop": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_ps": {
+          "type": "heading",
+          "settings": {
+            "title": "Wat je in de pro-webshop vindt.",
+            "use_h1": false
+          }
+        },
+        "text_ps": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Bij elk product staat de adviesprijs naast jouw prijs, zodat je korting per productgroep zichtbaar is.<br/>Alle prijzen excl. btw. Binnen de EU met een geldig btw-nummer verlegd.<br/>Het volledige gamma, ook de grote potten die niet in de gewone webshop staan.<br/>Je bestellingen, leveringen en facturen op één plek.</p>",
+            "enlarge_text": false
+          }
+        },
+        "button_ps": {
+          "type": "button",
+          "settings": {
+            "button_label": "Naar de pro-webshop",
+            "button_link": "https://pro.atelier-marhaban.com/shop",
+            "button_style": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "heading_ps",
+        "text_ps",
+        "button_ps"
+      ],
+      "name": "Rich text",
+      "settings": {
+        "height": "medium",
+        "text_alignment": "center",
+        "full_width": false,
+        "color_scheme": "2"
+      }
+    }
+  },
+  "order": [
+    "main",
+    "image_with_text_overlay_PegaLt",
+    "rich_text_FXU4FB",
+    "rich_text_proshop",
+    "image_with_text_EeUQaf",
+    "rich_text_TWXPEY",
+    "testimonials_nmAYCw",
+    "image_with_text_Ng68EQ",
+    "contact_form_jDChLk"
+  ]
+}
