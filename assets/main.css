@@ -11089,3 +11089,6 @@ model-viewer .container {
 @media (min-width: 768px) {
   .media-gallery__inner { max-width: max(340px, calc(100vh - 320px)); margin-inline: auto; }
 }
+
+/* Atelier Marhaban: backorder-tekst zonder herhaalde productnaam */
+.backorder__product { display: none; }
