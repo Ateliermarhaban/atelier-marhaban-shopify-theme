@@ -384,10 +384,85 @@
         "image_position": "left",
         "segment_position": "over-text"
       }
+    },
+    "vormen": {
+      "type": "collection-list",
+      "blocks": {
+        "vorm_vierkante_zelliges": {
+          "type": "collection",
+          "settings": {
+            "collection": "vierkante-zelliges",
+            "image": "shopify://shop_images/zellige-vierkant-10x10-naturel-brut.png",
+            "subheading": "10 × 10 of 5 × 5 cm",
+            "button_label": ""
+          }
+        },
+        "vorm_zelliges_rechthoek": {
+          "type": "collection",
+          "settings": {
+            "collection": "zelliges-rechthoek",
+            "image": "shopify://shop_images/zellige-rechthoek-10x3-5-naturel-brut.png",
+            "subheading": "10 × 3,5 of 15 × 2,5 cm",
+            "button_label": ""
+          }
+        },
+        "vorm_hexa": {
+          "type": "collection",
+          "settings": {
+            "collection": "hexa",
+            "image": "shopify://shop_images/zellige-hexa-10-3x9-naturel-brut.png",
+            "subheading": "10,3 × 9 of 5 × 5 cm",
+            "button_label": ""
+          }
+        },
+        "vorm_zelliges_trapezium": {
+          "type": "collection",
+          "settings": {
+            "collection": "zelliges-trapezium",
+            "image": "shopify://shop_images/zellige-trapezium-10x3-5-naturel-brut.png",
+            "subheading": "10 × 3,5 cm",
+            "button_label": ""
+          }
+        },
+        "vorm_zelliges_scala": {
+          "type": "collection",
+          "settings": {
+            "collection": "zelliges-scala",
+            "image": "shopify://shop_images/zellige-scala-12x11-naturel-brut.png",
+            "subheading": "12 × 11 of 6 × 5 cm",
+            "button_label": ""
+          }
+        }
+      },
+      "block_order": [
+        "vorm_vierkante_zelliges",
+        "vorm_zelliges_rechthoek",
+        "vorm_hexa",
+        "vorm_zelliges_trapezium",
+        "vorm_zelliges_scala"
+      ],
+      "name": "Kies een vorm",
+      "settings": {
+        "title": "Kies een vorm",
+        "enable_carousel": false,
+        "grid": 5,
+        "color_scheme": "1",
+        "full_width": false,
+        "coll_grid_image_shape": "square",
+        "coll_grid_image_position": "center center",
+        "coll_thumb_mob_per_row": "2",
+        "coll_grid_show_count": false,
+        "coll_text_position": "below",
+        "coll_text_position_under_mobile": false,
+        "coll_thumb_text_align_x": "center",
+        "coll_thumb_text_align_y": "top",
+        "coll_button_style": "primary"
+      }
     }
   },
   "order": [
     "rich_text_d4YttQ",
+    "vormen",
     "main",
     "background_video_FrXbUM",
     "image_with_text_qi3e7T",
