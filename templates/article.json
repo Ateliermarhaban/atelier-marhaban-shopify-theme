@@ -12,7 +12,7 @@
         "show_pinterest": false,
         "show_featured_image": true,
         "full_width_image": false,
-        "featured_image_height": "small",
+        "featured_image_height": "medium",
         "enable_title_overlay": false,
         "overlay_style": "shadow"
       }
