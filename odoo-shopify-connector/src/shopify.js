@@ -291,7 +291,7 @@ export async function listAllCustomers() {
         id firstName lastName
         defaultEmailAddress { emailAddress marketingState marketingOptInLevel }
         defaultPhoneNumber { phoneNumber }
-        defaultAddress { address1 address2 city zip countryCodeV2 phone company }
+        defaultAddress { id address1 address2 city zip countryCodeV2 phone company }
         mfCompany: metafield(namespace: "${MF_NAMESPACE}", key: "${MF_COMPANY_KEY}") { value }
         mfVat: metafield(namespace: "${MF_NAMESPACE}", key: "${MF_VAT_KEY}") { value }
       } }
@@ -313,6 +313,7 @@ export async function listAllCustomers() {
         last_name: node.lastName || '',
         phone: (node.defaultPhoneNumber && node.defaultPhoneNumber.phoneNumber) || (addr && addr.phone) || '',
         default_address: addr ? {
+          id: addr.id ? Number(String(addr.id).match(/(\d+)/)[1]) : null,
           address1: addr.address1 || '',
           address2: addr.address2 || '',
           city: addr.city || '',
@@ -368,6 +369,18 @@ export async function updateCustomerNative(id, { phone, address } = {}) {
   if (address) customer.addresses = [address];
   if (!phone && !address) return false;
   await shopifyFetch(`/customers/${id}.json`, { method: 'PUT', body: { customer } });
+  return true;
+}
+
+/**
+ * Zet het telefoonnummer op het standaardadres van een klant (niet op de klant
+ * zelf). Gebruikt de REST-adresendpoint; schrijft alleen het telefoonveld.
+ */
+export async function setAddressPhone(customerId, addressId, phone) {
+  await shopifyFetch(`/customers/${customerId}/addresses/${addressId}.json`, {
+    method: 'PUT',
+    body: { address: { id: addressId, phone } },
+  });
   return true;
 }
 

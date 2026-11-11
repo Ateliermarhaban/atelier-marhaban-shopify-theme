@@ -1,22 +1,24 @@
 // Klant-/adressynchronisatie tussen Shopify en Odoo (beide richtingen).
 //
-// Scope (Odoo-kant): alle contacten met e-mail die GEEN leverancier zijn
-// (supplier_rank = 0), ook met customer_rank 0. Interne sub-adressen en
-// gebruikers worden overgeslagen (zie odoo.listSyncablePartners).
+// Scope: alle contacten met e-mail die GEEN leverancier zijn (Odoo) en alle
+// Shopify-klanten. Eigen adressen (@atelier-marhaban.com) worden overgeslagen.
 //
 // Gedrag:
-//  - Nieuw: ontbrekende klant in de andere richting aanmaken (match op e-mail).
-//  - Aanvullen: bij een bestaande match lege velden vullen in BEIDE richtingen
-//    (adres, telefoon, bedrijfsnaam, btw). Een GEVULD veld wordt nooit
-//    overschreven; afwijkingen worden gelogd als [verschil].
-//  - Veldmapping bedrijfsnaam/btw volgt het /pages/klantgegevens-formulier:
-//    Shopify customer-metafields custom.bedrijfsnaam / custom.btw_nummer
-//    <-> Odoo company_name / vat.
-//  - Marketing: een Odoo-klant die al koopt (customer_rank > 0) wordt bij het
-//    aanmaken in Shopify op ingeschreven gezet (single opt-in, bron
-//    "bestaande klant"). Alle andere nieuwe contacten zonder toestemming.
-//    Bestaande inschrijvingen worden nooit gewijzigd, dus wie zich in Shopify
-//    heeft uitgeschreven blijft uitgeschreven.
+//  - Matching op e-mail. Per e-mailadres één Odoo-record: het persoon-record
+//    heeft voorrang boven het bedrijfsrecord met hetzelfde adres.
+//  - Nieuw: ontbrekende klant in de andere richting aanmaken.
+//  - Aanvullen: lege velden vullen in beide richtingen. Gevulde velden worden
+//    nooit overschreven; afwijkingen komen in de log als [verschil].
+//  - Bedrijfsnaam/btw: Shopify-metafields custom.bedrijfsnaam / custom.btw_nummer
+//    <-> Odoo het gekoppelde bedrijf (parent_id). Persoon koppelen via parent_id,
+//    nooit een bestaande koppeling overschrijven.
+//  - Telefoon: vergelijken genormaliseerd (alleen cijfers en +). Naar Shopify
+//    alleen geldige E.164-nummers, op het standaardadres (niet op de klant).
+//    Is het nummer al bij een andere klant in gebruik, dan overslaan en loggen.
+//  - Marketing: Odoo-koper (customer_rank > 0) wordt bij aanmaken in Shopify op
+//    ingeschreven (single opt-in, bron "bestaande klant"). Bestaande
+//    inschrijvingen worden nooit gewijzigd.
+//  - Per run wordt een Shopify-klant maximaal één keer bijgewerkt.
 
 import * as odoo from './odoo.js';
 import * as shopify from './shopify.js';
@@ -26,11 +28,37 @@ function log(...args) {
   console.log(new Date().toISOString(), ...args);
 }
 
+const OWN_DOMAIN = '@atelier-marhaban.com';
 const norm = (email) => (email || '').trim().toLowerCase();
+const isOwn = (email) => norm(email).endsWith(OWN_DOMAIN);
 const isEmpty = (v) => v === null || v === undefined || String(v).trim() === '';
 const val = (v) => (v === null || v === undefined ? '' : String(v).trim());
 const normVat = (v) => String(v || '').replace(/[\s.]/g, '').toUpperCase();
-let bSubscribed = 0; // nieuwe Shopify-klanten met marketingtoestemming (richting B)
+
+/** Telefoon genormaliseerd naar +cijfers. Leeg als het niet te herleiden is. */
+function normPhone(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return '';
+  const digits = s.replace(/[^\d+]/g, '');
+  if (digits.startsWith('+')) return '+' + digits.slice(1).replace(/\D/g, '');
+  if (digits.startsWith('00')) return '+' + digits.slice(2).replace(/\D/g, '');
+  if (digits.startsWith('0')) return '+32' + digits.slice(1).replace(/\D/g, ''); // Belgisch lokaal nummer
+  return '';
+}
+/** E.164: + gevolgd door 8-15 cijfers, eerste cijfer niet 0. */
+const isE164 = (p) => /^\+[1-9]\d{7,14}$/.test(p);
+
+/** Eén Odoo-record per e-mailadres: persoon voorrang boven bedrijf. */
+function dedupeOdooByEmail(partners) {
+  const byEmail = new Map();
+  for (const p of partners) {
+    const e = norm(p.email);
+    if (!e || isOwn(e)) continue;
+    const existing = byEmail.get(e);
+    if (!existing || (existing.is_company && !p.is_company)) byEmail.set(e, p);
+  }
+  return byEmail;
+}
 
 /** Odoo-partnergegevens uit een Shopify-klant (voor aanmaken in Odoo). */
 function partnerFromShopifyCustomer(c) {
@@ -40,7 +68,7 @@ function partnerFromShopifyCustomer(c) {
   return {
     name,
     email: c.email,
-    phone: c.phone || addr.phone || '',
+    phone: normPhone(c.phone || addr.phone) || '',
     street: addr.address1 || '',
     street2: addr.address2 || '',
     city: addr.city || '',
@@ -56,13 +84,16 @@ async function shopifyCustomerFromPartner(p) {
   const [firstName, ...rest] = (p.name || '').trim().split(' ');
   const lastName = rest.join(' ');
   const countryCode = p.country_id ? await odoo.getCountryCodeById(p.country_id[0]) : null;
-  const address = (p.street || p.city || p.zip)
+  const phone = normPhone(p.phone);
+  const hasAddress = !!(p.street || p.city || p.zip);
+  const address = hasAddress
     ? {
         address1: p.street || '',
         address2: p.street2 || '',
         city: p.city || '',
         zip: p.zip || '',
-        phone: p.phone || '',
+        // Telefoon op het adres, niet op de klant zelf.
+        ...(isE164(phone) ? { phone } : {}),
         ...(p.company_name ? { company: p.company_name } : {}),
         ...(countryCode ? { country_code: countryCode } : {}),
       }
@@ -71,35 +102,43 @@ async function shopifyCustomerFromPartner(p) {
     email: p.email,
     firstName: firstName || p.email,
     lastName,
-    phone: p.phone || '',
     address,
     companyName: p.company_name || '',
     vat: p.vat || '',
-    // "bestaande klant" = koopt al in Odoo -> single opt-in in Shopify.
     subscribe: (p.customer_rank || 0) > 0,
+    phoneDropped: !!phone && !hasAddress, // zonder adres geen plek voor telefoon
   };
 }
 
 export async function syncCustomers() {
-  const [shopCustomers, odooPartners, odooAllEmails] = await Promise.all([
+  const [allShopCustomers, allOdooPartners, odooAllEmails] = await Promise.all([
     shopify.listAllCustomers(),
     odoo.listSyncablePartners(),
     odoo.getAllPartnerEmails(),
   ]);
-  const shopByEmail = new Map(shopCustomers.map((c) => [norm(c.email), c]).filter(([e]) => e));
-  const odooByEmail = new Map(odooPartners.map((p) => [norm(p.email), p]).filter(([e]) => e));
+  const shopCustomers = allShopCustomers.filter((c) => !isOwn(c.email) && norm(c.email));
+  const shopByEmail = new Map(shopCustomers.map((c) => [norm(c.email), c]));
+  const odooByEmail = dedupeOdooByEmail(allOdooPartners);
+  const odooPartners = [...odooByEmail.values()];
   const shopEmails = new Set(shopByEmail.keys());
   const dry = config.service.dryRun;
-  log(`[klanten] Shopify: ${shopCustomers.length}, Odoo (syncbaar): ${odooPartners.length}.`);
+  log(`[klanten] Shopify: ${shopCustomers.length}, Odoo (één per e-mail): ${odooPartners.length}.`);
 
-  // === Richting A: Shopify -> Odoo (aanmaken + Odoo-velden aanvullen) ===
+  // Telefoon-eigenaar per genormaliseerd nummer (klant én adres), om dubbel gebruik te voorkomen.
+  const phoneOwner = new Map();
+  for (const c of shopCustomers) {
+    for (const raw of [c.phone, c.default_address && c.default_address.phone]) {
+      const p = normPhone(raw);
+      if (isE164(p) && !phoneOwner.has(p)) phoneOwner.set(p, c.id);
+    }
+  }
+
+  // === Richting A: Shopify -> Odoo ===
   let aNew = 0, aFilled = 0, aDiff = 0;
   for (const c of shopCustomers) {
     const email = norm(c.email);
-    if (!email) continue;
 
     if (!odooAllEmails.has(email)) {
-      // Nieuw: partner aanmaken.
       const data = partnerFromShopifyCustomer(c);
       aNew++;
       if (dry) { log(`[klanten][DRY][A] Odoo-partner aanmaken: ${data.email} (${data.name}).`); continue; }
@@ -108,13 +147,14 @@ export async function syncCustomers() {
       continue;
     }
 
-    // Bestaat al: lege Odoo-velden aanvullen vanuit Shopify.
     const p = odooByEmail.get(email);
-    if (!p) continue; // in Odoo maar niet syncbaar (bv. leverancier) -> met rust laten
+    if (!p) continue; // alleen een bedrijfsrecord of leverancier: met rust laten
     const addr = c.default_address || {};
     const shopCountry = addr.country_code || '';
+    const shopPhone = normPhone(c.phone || addr.phone);
+    const odooPhone = normPhone(p.phone);
     const fields = [
-      ['phone', c.phone || addr.phone || '', val(p.phone)],
+      ['phone', isE164(shopPhone) ? shopPhone : '', odooPhone],
       ['street', addr.address1 || '', val(p.street)],
       ['street2', addr.address2 || '', val(p.street2)],
       ['city', addr.city || '', val(p.city)],
@@ -129,16 +169,13 @@ export async function syncCustomers() {
         log(`[verschil][${email}] ${key}: Odoo "${odooVal}" <-> Shopify "${shopVal}" (niet overschreven).`);
       }
     }
-    // Land apart (code-vergelijking).
     const odooCountry = p.country_id ? await odoo.getCountryCodeById(p.country_id[0]) : '';
     if (isEmpty(odooCountry) && !isEmpty(shopCountry)) { update.countryCode = shopCountry; filledThis = true; }
     else if (!isEmpty(odooCountry) && !isEmpty(shopCountry) && odooCountry !== shopCountry) {
-      diffThis = true;
-      log(`[verschil][${email}] land: Odoo "${odooCountry}" <-> Shopify "${shopCountry}" (niet overschreven).`);
+      diffThis = true; log(`[verschil][${email}] land: Odoo "${odooCountry}" <-> Shopify "${shopCountry}" (niet overschreven).`);
     }
 
-    // Bedrijf/btw: persoon koppelen aan een bedrijf via parent_id. Een bestaande
-    // parent_id wordt nooit overschreven (linkPartnerToCompany controleert dat).
+    // Bedrijf: persoon koppelen aan bedrijf (alleen als er nog geen parent is).
     const shopCompany = c.company_name || addr.company || '';
     const shopVat = c.vat || '';
     if (!p.parentId && (shopCompany || shopVat)) {
@@ -157,59 +194,86 @@ export async function syncCustomers() {
     }
 
     if (diffThis) aDiff++;
-    if (filledThis) {
+    if (filledThis && Object.keys(update).length) {
       aFilled++;
       if (dry) log(`[klanten][DRY][A] Odoo aanvullen ${email}: ${Object.keys(update).join(', ')}.`);
       else {
         try { await odoo.updatePartnerFields(p.id, update); log(`[klanten][A] Odoo aangevuld ${email}: ${Object.keys(update).join(', ')}.`); }
         catch (err) { log(`[klanten][A] FOUT aanvullen ${email}:`, err.message); aFilled--; }
       }
+    } else if (filledThis) {
+      aFilled++; // alleen bedrijfskoppeling
     }
   }
 
-  // === Richting B: Odoo -> Shopify (aanmaken + Shopify-velden aanvullen) ===
-  let bNew = 0, bFilled = 0, bDiff = 0;
+  // === Richting B: Odoo -> Shopify ===
+  let bNew = 0, bFilled = 0, bDiff = 0, bSubscribed = 0, bPhoneSkipped = 0;
+  const touchedShop = new Set(); // max één update per Shopify-klant per run
   for (const p of odooPartners) {
     const email = norm(p.email);
-    if (!email) continue;
 
     if (!shopEmails.has(email)) {
       const data = await shopifyCustomerFromPartner(p);
       bNew++;
       if (data.subscribe) bSubscribed++;
+      if (data.phoneDropped) log(`[klanten][B] Telefoon van ${email} overgeslagen: geen adres om het op te zetten.`);
       if (dry) { log(`[klanten][DRY][B] Shopify-klant aanmaken: ${data.email}${data.subscribe ? ' (ingeschreven, bron bestaande klant)' : ''}.`); continue; }
       try { await shopify.createCustomer(data); log(`[klanten][B] Shopify-klant aangemaakt: ${data.email}.`); }
       catch (err) { log(`[klanten][B] FOUT aanmaken ${data.email}:`, err.message); bNew--; }
       continue;
     }
 
-    // Bestaat al: lege Shopify-velden aanvullen vanuit Odoo.
     const c = shopByEmail.get(email);
     if (!c) continue;
+    if (touchedShop.has(c.id)) { log(`[klanten][B] ${email} al bijgewerkt in deze run, overslaan.`); continue; }
     const addr = c.default_address || {};
     const odooCountry = p.country_id ? await odoo.getCountryCodeById(p.country_id[0]) : '';
 
     let filledThis = false, diffThis = false;
-    // Telefoon (native).
-    let nativePhone = null;
-    if (isEmpty(c.phone) && !isEmpty(p.phone)) { nativePhone = val(p.phone); filledThis = true; }
-    else if (!isEmpty(c.phone) && !isEmpty(p.phone) && val(c.phone) !== val(p.phone)) {
-      diffThis = true; log(`[verschil][${email}] telefoon: Shopify "${val(c.phone)}" <-> Odoo "${val(p.phone)}" (niet overschreven).`);
+    const parts = [];
+
+    // Telefoon: genormaliseerd vergelijken; alleen geldig E.164; op het adres.
+    const odooPhone = normPhone(p.phone);
+    const shopPhone = normPhone(c.phone || addr.phone);
+    if (isEmpty(shopPhone) && isE164(odooPhone)) {
+      const owner = phoneOwner.get(odooPhone);
+      if (owner !== undefined && owner !== c.id) {
+        bPhoneSkipped++;
+        log(`[klanten][B] Telefoon ${odooPhone} van ${email} overgeslagen: al in gebruik bij klant ${owner}.`);
+      } else if (!isE164(odooPhone)) {
+        bPhoneSkipped++;
+        log(`[klanten][B] Telefoon van ${email} ongeldig (${p.phone}), overgeslagen.`);
+      } else if (addr.id) {
+        if (dry) { parts.push('telefoon (adres)'); filledThis = true; }
+        else {
+          try { await shopify.setAddressPhone(c.id, addr.id, odooPhone); parts.push('telefoon (adres)'); filledThis = true; touchedShop.add(c.id); phoneOwner.set(odooPhone, c.id); }
+          catch (err) { log(`[klanten][B] FOUT telefoon ${email}:`, err.message); }
+        }
+      } else {
+        log(`[klanten][B] Telefoon van ${email} overgeslagen: geen standaardadres.`);
+        bPhoneSkipped++;
+      }
+    } else if (!isEmpty(shopPhone) && isE164(odooPhone) && shopPhone !== odooPhone) {
+      diffThis = true; log(`[verschil][${email}] telefoon: Shopify "${shopPhone}" <-> Odoo "${odooPhone}" (niet overschreven).`);
     }
-    // Adres (native): alleen aanvullen als Shopify nog GEEN standaardadres heeft
-    // (per-veld samenvoegen op een bestaand adres vergt het adres-id; dat vermijden
-    // we om niets te overschrijven).
-    let newAddress = null;
+
+    // Adres: alleen aanmaken als Shopify nog geen standaardadres heeft.
     if (!c.default_address && (p.street || p.city || p.zip)) {
-      newAddress = {
+      const newAddress = {
         address1: p.street || '', address2: p.street2 || '', city: p.city || '',
-        zip: p.zip || '', phone: p.phone || '',
+        zip: p.zip || '',
+        ...(isE164(odooPhone) ? { phone: odooPhone } : {}),
         ...(p.company_name ? { company: p.company_name } : {}),
         ...(odooCountry ? { country_code: odooCountry } : {}),
       };
+      parts.push('adres');
       filledThis = true;
+      if (dry) { /* gelogd in de samenvatting */ }
+      else {
+        try { await shopify.updateCustomerNative(c.id, { address: newAddress }); touchedShop.add(c.id); }
+        catch (err) { log(`[klanten][B] FOUT adres ${email}:`, err.message); }
+      }
     } else if (c.default_address && (p.street || p.city || p.zip)) {
-      // Bestaand adres: alleen afwijkingen melden.
       const pairs = [['straat', addr.address1, p.street], ['postcode', addr.zip, p.zip], ['gemeente', addr.city, p.city]];
       for (const [k, s, o] of pairs) {
         if (!isEmpty(s) && !isEmpty(o) && val(s) !== val(o)) {
@@ -217,14 +281,17 @@ export async function syncCustomers() {
         }
       }
     }
-    // Metafields bedrijfsnaam / btw.
+
+    // Bedrijfsnaam / btw via metafields.
     const mf = {};
     for (const [key, shopVal, odooVal, label] of [
       ['companyName', c.company_name, p.company_name, 'bedrijfsnaam'],
       ['vat', c.vat, p.vat, 'btw'],
     ]) {
-      if (isEmpty(shopVal) && !isEmpty(odooVal)) { mf[key] = val(odooVal); filledThis = true; }
-      else if (!isEmpty(shopVal) && !isEmpty(odooVal) && val(shopVal) !== val(odooVal)) {
+      if (isEmpty(shopVal) && !isEmpty(odooVal)) { mf[key] = val(odooVal); filledThis = true; parts.push(label); }
+      else if (!isEmpty(shopVal) && !isEmpty(odooVal) && normVat(shopVal) !== normVat(odooVal) && key === 'vat') {
+        diffThis = true; log(`[verschil][${email}] btw: Shopify "${val(shopVal)}" <-> Odoo "${val(odooVal)}" (niet overschreven).`);
+      } else if (!isEmpty(shopVal) && !isEmpty(odooVal) && val(shopVal) !== val(odooVal)) {
         diffThis = true; log(`[verschil][${email}] ${label}: Shopify "${val(shopVal)}" <-> Odoo "${val(odooVal)}" (niet overschreven).`);
       }
     }
@@ -232,19 +299,18 @@ export async function syncCustomers() {
     if (diffThis) bDiff++;
     if (filledThis) {
       bFilled++;
-      const parts = [nativePhone ? 'telefoon' : null, newAddress ? 'adres' : null, ...Object.keys(mf)].filter(Boolean);
-      if (dry) log(`[klanten][DRY][B] Shopify aanvullen ${email}: ${parts.join(', ')}.`);
-      else {
-        try {
-          if (nativePhone || newAddress) await shopify.updateCustomerNative(c.id, { phone: nativePhone || undefined, address: newAddress || undefined });
-          if (Object.keys(mf).length) await shopify.setCustomerMetafields(c.gid, mf);
-          log(`[klanten][B] Shopify aangevuld ${email}: ${parts.join(', ')}.`);
-        } catch (err) { log(`[klanten][B] FOUT aanvullen ${email}:`, err.message); bFilled--; }
+      if (Object.keys(mf).length) {
+        if (dry) log(`[klanten][DRY][B] Shopify metafields ${email}: ${Object.keys(mf).join(', ')}.`);
+        else {
+          try { await shopify.setCustomerMetafields(c.gid, mf); touchedShop.add(c.id); }
+          catch (err) { log(`[klanten][B] FOUT metafields ${email}:`, err.message); }
+        }
       }
+      if (!dry && parts.length) log(`[klanten][B] Shopify aangevuld ${email}: ${parts.join(', ')}.`);
     }
   }
 
   const w = dry ? 'zou' : '';
   log(`[klanten] Richting A (Shopify->Odoo): ${w} nieuw ${aNew}, aangevuld ${aFilled}, verschillend ${aDiff}.`);
-  log(`[klanten] Richting B (Odoo->Shopify): ${w} nieuw ${bNew} (waarvan ${bSubscribed} met toestemming, bron bestaande klant), aangevuld ${bFilled}, verschillend ${bDiff}.`);
+  log(`[klanten] Richting B (Odoo->Shopify): ${w} nieuw ${bNew} (waarvan ${bSubscribed} met toestemming, bron bestaande klant), aangevuld ${bFilled}, verschillend ${bDiff}, telefoon overgeslagen ${bPhoneSkipped}.`);
 }

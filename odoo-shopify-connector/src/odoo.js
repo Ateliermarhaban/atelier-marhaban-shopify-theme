@@ -346,7 +346,7 @@ export async function listSyncablePartners() {
     ], {
       fields: [
         'name', 'email', 'phone', 'street', 'street2', 'city', 'zip',
-        'country_id', 'vat', 'customer_rank', 'parent_id',
+        'country_id', 'vat', 'customer_rank', 'parent_id', 'is_company',
       ],
       limit: pageSize,
       offset,
