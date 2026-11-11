@@ -118,7 +118,14 @@
             "open": false,
             "show_in_quickbuy": false,
             "content": "",
-            "custom_liquid": "<p>Bestel 15% extra, voor snijverlies en om tegels uit verschillende dozen te mengen bij het plaatsen.</p><p>Ook wat niet op stock ligt, kun je bestellen. Atelier Marhaban bevestigt de levertermijn binnen enkele werkdagen.</p><p>Stalen op aanvraag via <a href=\"/pages/contact\">contact</a>. Architect, plaatser of winkel? Kijk op <a href=\"/pages/professionals\">Professionals</a>.</p>"
+            "custom_liquid": "<p>Bestel 15% extra, voor snijverlies en om tegels uit verschillende dozen te mengen bij het plaatsen.</p><p>Ook wat niet op stock ligt, kun je bestellen. Atelier Marhaban bevestigt de levertermijn binnen enkele werkdagen.</p><p>Twijfel je over de kleur? Bestel eerst een staal: één stuk voor € 15, verzending inbegrepen. Architect, plaatser of winkel? Kijk op <a href=\"/pages/professionals\">Professionals</a>.</p>"
+          }
+        },
+        "custom_liquid_staal": {
+          "type": "custom-liquid",
+          "settings": {
+            "custom_liquid": "{%- assign staal = all_products['staal-zellige'] -%}{%- if staal and staal.available -%}{%- assign vorm = product.title | split: ' - ' | first -%}{%- assign kleur = product.title | split: ' - ' | last -%}{%- assign staal_variant = staal.selected_or_first_available_variant -%}{%- assign gevonden = false -%}{%- for v in staal.variants -%}{%- if v.option1 == vorm and v.option2 == kleur -%}{%- assign staal_variant = v -%}{%- assign gevonden = true -%}{%- break -%}{%- endif -%}{%- endfor -%}{%- if gevonden -%}<form method=\"post\" action=\"{{ routes.cart_add_url }}\" style=\"margin-top:0.5rem\"><input type=\"hidden\" name=\"id\" value=\"{{ staal_variant.id }}\"><input type=\"hidden\" name=\"quantity\" value=\"1\"><button type=\"submit\" class=\"btn btn--secondary\" style=\"width:100%\">Eerst een staal: {{ staal_variant.price | money }}</button><p style=\"margin-top:0.5rem;font-size:0.9em\">Eén stuk {{ vorm | downcase }} in {{ kleur }}, verzending inbegrepen.</p></form>{%- endif -%}{%- endif -%}",
+            "show_in_quickbuy": false
           }
         }
       },
@@ -129,6 +136,7 @@
         "divider_wDWKft",
         "variant-picker",
         "buy-buttons",
+        "custom_liquid_staal",
         "description",
         "accordion_kenmerken",
         "accordion_toepassing",
