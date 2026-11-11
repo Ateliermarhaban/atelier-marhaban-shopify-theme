@@ -35,6 +35,17 @@ const isEmpty = (v) => v === null || v === undefined || String(v).trim() === '';
 const val = (v) => (v === null || v === undefined ? '' : String(v).trim());
 const normVat = (v) => String(v || '').replace(/[\s.]/g, '').toUpperCase();
 
+// Odoo-labels die als Shopify-tag met dezelfde naam meegaan. Alleen toevoegen.
+const TAG_LABELS = new Set([
+  'B2B', 'Detailzaak', 'Interieurarchitect', 'Project', 'Tegelbedrijf',
+  'Verdeler', 'Prospect', 'Zwembadbouwer', 'Mailing B2B',
+]);
+const ODOO_TAG = 'Odoo';
+const MAILING_LABEL = 'Mailing B2B';
+/** Tags die op een Odoo-klant horen: "Odoo" plus de bekende labels van de contactpersoon. */
+const wantedTags = (p) => [ODOO_TAG, ...(p.labels || []).filter((l) => TAG_LABELS.has(l))];
+const wantsMailing = (p) => (p.labels || []).includes(MAILING_LABEL);
+
 /** Telefoon genormaliseerd naar +cijfers. Leeg als het niet te herleiden is. */
 function normPhone(raw) {
   const s = String(raw || '').trim();
@@ -207,7 +218,7 @@ export async function syncCustomers() {
   }
 
   // === Richting B: Odoo -> Shopify ===
-  let bNew = 0, bFilled = 0, bDiff = 0, bSubscribed = 0, bPhoneSkipped = 0;
+  let bNew = 0, bFilled = 0, bDiff = 0, bSubscribed = 0, bPhoneSkipped = 0, bTags = 0, bConsent = 0;
   const touchedShop = new Set(); // max één update per Shopify-klant per run
   for (const p of odooPartners) {
     const email = norm(p.email);
@@ -217,8 +228,24 @@ export async function syncCustomers() {
       bNew++;
       if (data.subscribe) bSubscribed++;
       if (data.phoneDropped) log(`[klanten][B] Telefoon van ${email} overgeslagen: geen adres om het op te zetten.`);
-      if (dry) { log(`[klanten][DRY][B] Shopify-klant aanmaken: ${data.email}${data.subscribe ? ' (ingeschreven, bron bestaande klant)' : ''}.`); continue; }
-      try { await shopify.createCustomer(data); log(`[klanten][B] Shopify-klant aangemaakt: ${data.email}.`); }
+      const tags = wantedTags(p);
+      if (dry) {
+        log(`[klanten][DRY][B] Shopify-klant aanmaken: ${data.email}${data.subscribe ? ' (ingeschreven, bron bestaande klant)' : ''}. Tags: ${tags.join(', ')}.`);
+        if (wantsMailing(p) && !data.subscribe) log(`[klanten][DRY][B] Mailing B2B-toestemming zetten: ${data.email}.`);
+        continue;
+      }
+      try {
+        const created = await shopify.createCustomer(data);
+        const gid = `gid://shopify/Customer/${created.id}`;
+        log(`[klanten][B] Shopify-klant aangemaakt: ${data.email}.`);
+        await shopify.addCustomerTags(gid, tags);
+        log(`[klanten][B] Tags gezet ${data.email}: ${tags.join(', ')}.`);
+        if (wantsMailing(p) && !data.subscribe) {
+          await shopify.subscribeEmailMarketing(gid);
+          bConsent++;
+          log(`[klanten][B] Mailing B2B-toestemming gezet ${data.email} (single opt-in).`);
+        }
+      }
       catch (err) { log(`[klanten][B] FOUT aanmaken ${data.email}:`, err.message); bNew--; }
       continue;
     }
@@ -296,6 +323,31 @@ export async function syncCustomers() {
       }
     }
 
+    // Tags: alleen toevoegen die er nog niet op staan. Tags die anderen zetten blijven staan.
+    const missingTags = wantedTags(p).filter((t) => !(c.tags || []).includes(t));
+    if (missingTags.length) {
+      filledThis = true; parts.push(`tags ${missingTags.join(', ')}`); bTags++;
+      if (dry) log(`[klanten][DRY][B] Tags ${email}: + ${missingTags.join(', ')}.`);
+      else {
+        try { await shopify.addCustomerTags(c.gid, missingTags); }
+        catch (err) { log(`[klanten][B] FOUT tags ${email}:`, err.message); }
+      }
+    }
+    // Mailing B2B: inschrijven alleen als de klant nu niet ingeschreven is. Uitgeschreven
+    // (UNSUBSCRIBED) of in behandeling (PENDING) wordt nooit gewijzigd.
+    if (wantsMailing(p)) {
+      const state = c.marketingState || 'NOT_SUBSCRIBED';
+      if (state === 'NOT_SUBSCRIBED' || state === '') {
+        if (dry) { log(`[klanten][DRY][B] Mailing B2B-toestemming zetten: ${email} (nu ${state || 'leeg'}).`); bConsent++; }
+        else {
+          try { await shopify.subscribeEmailMarketing(c.gid); bConsent++; log(`[klanten][B] Mailing B2B-toestemming gezet ${email} (single opt-in).`); }
+          catch (err) { log(`[klanten][B] FOUT toestemming ${email}:`, err.message); }
+        }
+      } else {
+        log(`[klanten][B] Mailing B2B ${email}: toestemming ongewijzigd (${state}).`);
+      }
+    }
+
     if (diffThis) bDiff++;
     if (filledThis) {
       bFilled++;
@@ -312,5 +364,5 @@ export async function syncCustomers() {
 
   const w = dry ? 'zou' : '';
   log(`[klanten] Richting A (Shopify->Odoo): ${w} nieuw ${aNew}, aangevuld ${aFilled}, verschillend ${aDiff}.`);
-  log(`[klanten] Richting B (Odoo->Shopify): ${w} nieuw ${bNew} (waarvan ${bSubscribed} met toestemming, bron bestaande klant), aangevuld ${bFilled}, verschillend ${bDiff}, telefoon overgeslagen ${bPhoneSkipped}.`);
+  log(`[klanten] Richting B (Odoo->Shopify): ${w} nieuw ${bNew} (waarvan ${bSubscribed} met toestemming, bron bestaande klant), aangevuld ${bFilled}, verschillend ${bDiff}, telefoon overgeslagen ${bPhoneSkipped}, tags bijgewerkt ${bTags}, Mailing B2B-toestemming ${bConsent}.`);
 }

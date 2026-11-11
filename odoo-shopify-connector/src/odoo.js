@@ -347,7 +347,7 @@ export async function listSyncablePartners() {
     ], {
       fields: [
         'name', 'email', 'phone', 'street', 'street2', 'city', 'zip',
-        'country_id', 'vat', 'customer_rank', 'parent_id', 'is_company',
+        'country_id', 'vat', 'customer_rank', 'parent_id', 'is_company', 'category_id',
       ],
       limit: pageSize,
       offset,
@@ -355,6 +355,40 @@ export async function listSyncablePartners() {
     results.push(...records);
     if (records.length < pageSize) break;
     offset += pageSize;
+  }
+
+  // Diagnose: contacten met e-mail die door de filter vallen (type, gekoppelde
+  // gebruiker, of gearchiveerd). Zo is zichtbaar waarom iemand niet in Shopify komt.
+  const excluded = await execute('res.partner', 'search_read', [
+    [
+      ['email', '!=', false],
+      ['supplier_rank', '=', 0],
+      '|', ['type', '!=', 'contact'], ['user_ids', '!=', false],
+    ],
+  ], {
+    fields: ['name', 'email', 'type', 'user_ids', 'parent_id', 'active'],
+    limit: 1000,
+    context: { active_test: false },
+  });
+  for (const e of excluded) {
+    if (String(e.email || '').toLowerCase().endsWith('@atelier-marhaban.com')) continue;
+    console.log(new Date().toISOString(), `[klanten][uitgesloten] ${e.email} (${e.name}): type=${e.type}, user_ids=${(e.user_ids || []).length}, parent=${e.parent_id ? e.parent_id[1] : '-'}, actief=${e.active}.`);
+  }
+  // Gearchiveerde contacten met e-mail (default-filter zou ze verbergen).
+  const archived = await execute('res.partner', 'search_count', [
+    [['email', '!=', false], ['active', '=', false], ['supplier_rank', '=', 0]],
+  ], { context: { active_test: false } });
+  if (archived) console.log(new Date().toISOString(), `[klanten][uitgesloten] ${archived} gearchiveerde contact(en) met e-mail (niet gesynchroniseerd).`);
+
+  // Labels (category_id) -> namen. Alleen de namen; de tagkeuze gebeurt in customers.js.
+  const catIds = [...new Set(results.flatMap((r) => r.category_id || []))];
+  const catNames = new Map();
+  if (catIds.length) {
+    const cats = await execute('res.partner.category', 'read', [catIds], { fields: ['name'] });
+    for (const c of cats) catNames.set(c.id, c.name);
+  }
+  for (const r of results) {
+    r.labels = (r.category_id || []).map((id) => catNames.get(id)).filter(Boolean);
   }
 
   // Odoo 20 kent geen company_name op personen. Bedrijfsnaam = naam van het

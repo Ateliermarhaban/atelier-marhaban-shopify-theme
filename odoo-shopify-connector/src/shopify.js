@@ -294,6 +294,7 @@ export async function listAllCustomers() {
         defaultAddress { id address1 address2 city zip countryCodeV2 phone company }
         mfCompany: metafield(namespace: "${MF_NAMESPACE}", key: "${MF_COMPANY_KEY}") { value }
         mfVat: metafield(namespace: "${MF_NAMESPACE}", key: "${MF_VAT_KEY}") { value }
+        tags
       } }
     }
   }`;
@@ -324,6 +325,7 @@ export async function listAllCustomers() {
         } : null,
         company_name: (node.mfCompany && node.mfCompany.value) || '',
         vat: (node.mfVat && node.mfVat.value) || '',
+        tags: node.tags || [],
       });
     }
     if (!conn.pageInfo.hasNextPage) break;
@@ -336,6 +338,41 @@ export async function listAllCustomers() {
  * Maak een nieuwe Shopify-klant aan (REST). Optioneel met adres, metafields
  * (bedrijfsnaam/btw) en marketingtoestemming (single opt-in).
  */
+/**
+ * Voegt tags toe aan een Shopify-klant (tagsAdd). Verwijdert nooit tags.
+ * gid: "gid://shopify/Customer/123".
+ */
+export async function addCustomerTags(gid, tags) {
+  if (!tags || !tags.length) return;
+  const mutation = `mutation($id: ID!, $tags: [String!]!) {
+    tagsAdd(id: $id, tags: $tags) { userErrors { field message } }
+  }`;
+  const data = await shopifyGraphql(mutation, { id: gid, tags });
+  const errs = data && data.tagsAdd ? data.tagsAdd.userErrors : [];
+  if (errs && errs.length) throw new Error(errs.map((e) => e.message).join('; '));
+}
+
+/**
+ * Zet e-mailmarketing op SUBSCRIBED met single opt-in. Alleen aanroepen als de
+ * klant nu NOT_SUBSCRIBED of leeg is; uitgeschreven klanten nooit opnieuw inschrijven.
+ */
+export async function subscribeEmailMarketing(gid) {
+  const mutation = `mutation($input: CustomerEmailMarketingConsentUpdateInput!) {
+    customerEmailMarketingConsentUpdate(input: $input) {
+      customer { id }
+      userErrors { field message }
+    }
+  }`;
+  const input = {
+    customerId: gid,
+    emailMarketingConsent: { marketingState: 'SUBSCRIBED', marketingOptInLevel: 'SINGLE_OPT_IN' },
+  };
+  const data = await shopifyGraphql(mutation, { input });
+  const errs = data && data.customerEmailMarketingConsentUpdate
+    ? data.customerEmailMarketingConsentUpdate.userErrors : [];
+  if (errs && errs.length) throw new Error(errs.map((e) => e.message).join('; '));
+}
+
 export async function createCustomer({ email, firstName, lastName, phone, address, companyName, vat, subscribe }) {
   const customer = { email };
   if (firstName) customer.first_name = firstName;
