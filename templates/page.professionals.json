@@ -156,7 +156,7 @@
         "text_39fAAk": {
           "type": "text",
           "settings": {
-            "text": "<p>Per product: formaten, plaatsing en onderhoud. Voor de zelliges ook de testresultaten van TCKI, onder meer op vorst, thermoshock en zwembadchloor.</p>",
+            "text": "<p>Voor de zelliges en bejmats: formaten, kleuren, plaatsing en onderhoud, met de testresultaten van TCKI op onder meer vorst, thermoshock en zwembadchloor. Je laat je gegevens achter en downloadt de fiche meteen.</p>",
             "enlarge_text": false
           }
         },
@@ -164,7 +164,7 @@
           "type": "button",
           "settings": {
             "button_label": "Technische fiches downloaden",
-            "button_link": "",
+            "button_link": "https://pro.atelier-marhaban.com/technische-fiches",
             "button_style": "primary"
           }
         }
