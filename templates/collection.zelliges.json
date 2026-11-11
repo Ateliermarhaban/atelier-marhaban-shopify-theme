@@ -48,7 +48,7 @@
         "overlay_style": "shadow",
         "coll_desc_pos": "below",
         "coll_num_per_page_int": 24,
-        "grid": 4,
+        "grid": 5,
         "show_vendor": false,
         "show_total": false,
         "enable_filtering": false,

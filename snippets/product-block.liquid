@@ -89,7 +89,7 @@ Parameters:
             assign custom_crop = 'contain'
           endif
         -%}
-        <div class="image-cont {% if show_hover_image %}image-cont--with-secondary-image {% if aspect_ratios_same %}image-cont--same-aspect-ratio{% endif %}{% endif %}">
+        <div class="image-cont {% if product.template_suffix == 'zelliges' or product.template_suffix == 'bejmats' %}image-cont--tegel {% endif %}{% if show_hover_image %}image-cont--with-secondary-image {% if aspect_ratios_same %}image-cont--same-aspect-ratio{% endif %}{% endif %}">
           <a class="product-link{% if settings.quickbuy_style == 'whole' %}{% unless no_quick_buy %} quickbuy-toggle{% endunless %}{% endif %}" href="{{ product_url }}" aria-hidden="true" tabindex="-1">
             <div class="image-label-wrap">
               <div>
