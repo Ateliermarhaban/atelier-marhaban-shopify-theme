@@ -115,15 +115,15 @@
         "text_JKBjaE": {
           "type": "text",
           "settings": {
-            "text": "<p>Zelliges bestel je als stalen, los of gekleefd op een zwart staalbord. Zo leg je de echte kleur naast de plannen bij je klant.</p>",
+            "text": "<p>Zelliges bestel je als stalen, los of gekleefd op zwarte plaatjes. Zo leg je de echte kleur naast de plannen bij je klant.</p><p>Het losse stalenpakket is gratis: één zellige in elk van de 13 kleuren en één stuk van elke andere vorm. Het stalenpakket op MDF bestaat uit 21 zwarte plaatjes van 29,5 × 34 cm: één per kleur en één per vorm, telkens met 4 zelliges.</p>",
             "enlarge_text": false
           }
         },
         "button_VcTbAH": {
           "type": "button",
           "settings": {
-            "button_label": "Stalen aanvragen",
-            "button_link": "shopify://pages/contact",
+            "button_label": "Stalen bestellen",
+            "button_link": "https://pro.atelier-marhaban.com/shop/category/stalen-7",
             "button_style": "secondary"
           }
         }
@@ -135,7 +135,7 @@
       ],
       "name": "Image with text",
       "settings": {
-        "image": "shopify://shop_images/P1665677_kopie.jpg",
+        "image": "shopify://shop_images/am-stalenpakket-mdf.jpg",
         "image_width": 700,
         "image_link": "",
         "image_position": "left",
