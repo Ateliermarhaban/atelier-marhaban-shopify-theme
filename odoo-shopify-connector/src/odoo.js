@@ -1,5 +1,6 @@
 import xmlrpc from 'xmlrpc';
 import { config } from './config.js';
+import { parseBeNumber } from './vat.js';
 
 // --- XML-RPC endpoints (stabiel op alle Odoo-edities, inclusief Online SaaS) ---
 const commonClient = xmlrpc.createSecureClient(`${config.odoo.url}/xmlrpc/2/common`);
@@ -383,6 +384,11 @@ const normVat = (v) => String(v || '').replace(/[\s.]/g, '').toUpperCase();
  * Bestaat het niet, dan wordt het aangemaakt met naam en btw. Geeft het id terug.
  */
 export async function findOrCreateCompany({ name, vat }) {
+  // Ondernemingsnummer (10 cijfers, zonder BE-prefix) hoort in company_registry, niet in vat.
+  const reg = parseBeNumber(vat);
+  if (reg && !/^BE/i.test(String(vat).trim())) {
+    return (await findOrCreateCompanyByRegistry({ name, digits: reg })).id;
+  }
   const cleanVat = normVat(vat);
   if (cleanVat) {
     const byVat = await execute('res.partner', 'search_read', [
@@ -625,4 +631,25 @@ export async function findCompanyIdByVat(vat) {
   ], { fields: ['vat'], limit: 0 });
   const hit = companies.find((r) => normVat(r.vat) === clean);
   return hit ? hit.id : null;
+}
+
+/** Read-only: bedrijf op ondernemingsnummer (company_registry), of null. */
+export async function findCompanyIdByRegistry(digits) {
+  if (!digits) return null;
+  const ids = await execute('res.partner', 'search', [[
+    ['is_company', '=', true], ['company_registry', '=', digits],
+  ]], { limit: 1 });
+  return ids.length ? ids[0] : null;
+}
+
+/** Bedrijf op ondernemingsnummer zoeken of aanmaken, zonder btw-nummer. */
+export async function findOrCreateCompanyByRegistry({ name, digits }) {
+  const existing = await findCompanyIdByRegistry(digits);
+  if (existing) return { id: existing, created: false };
+  const id = await execute('res.partner', 'create', [{
+    name: name || digits,
+    company_registry: digits,
+    is_company: true,
+  }]);
+  return { id, created: true };
 }
