@@ -7,10 +7,9 @@
 //     en verzending volgens het plan. Daarna tag factuur-odoo.
 //
 // Actie per bestelling:
-//   "boeken + Peppol + mail"     BE-klant met Peppol-geverifieerd. Verzending via Peppol
-//                                 (alleen als INVOICE_SEND_ENABLED=true).
-//   "boeken + mail"              buitenlandse klant met e-mail. Geboekt; mail is
-//                                 een concept voor Outlook (niet automatisch).
+//   "boeken + Peppol + mail"     BE-klant met Peppol-geverifieerd: via Peppol EN per mail met PDF.
+//   "boeken + mail"              buitenlands of niet op Peppol: per mail met PDF, automatisch.
+//                                 (Verzending alleen aan als INVOICE_SEND_ENABLED=true.)
 //   "boeken, niet versturen (PEPPOL-ONTBREEKT)"  BE-klant zonder Peppol.
 //   "concept (reden)"            blijft in concept; reden staat in de log.
 //
@@ -207,16 +206,19 @@ async function executePlan(order, info, plan) {
   await odoo.reconcileWithInvoice(invoiceId, payId, companyId);
   log(`[factuur] ${order.name}: geboekt en betaald (${plan.method}).`);
 
-  if (plan.action === 'boeken + Peppol + mail') {
-    await odoo.setPeppolIfVerified(companyId);
-    if (SEND_ENABLED) {
-      await odoo.sendInvoice(invoiceId);
-      log(`[factuur] ${order.name}: verzonden via Peppol.`);
+  // Verzenden (automatisch, want het totaal klopt):
+  //  - BE + Peppol: via Peppol EN per mail met PDF (sjabloon "Invoice: Sending").
+  //  - buitenlands of niet op Peppol: alleen per mail met PDF.
+  //  - BE zonder Peppol: niet versturen (PEPPOL-ONTBREEKT), dat is al gelogd.
+  if (plan.action === 'boeken + Peppol + mail' || plan.action === 'boeken + mail') {
+    const viaPeppol = plan.action === 'boeken + Peppol + mail';
+    if (viaPeppol) await odoo.setPeppolIfVerified(companyId);
+    if (!SEND_ENABLED) {
+      log(`[factuur] ${order.name}: verzending UIT (INVOICE_SEND_ENABLED). Zou ${viaPeppol ? 'via Peppol + ' : ''}mail naar ${plan.email} gaan.`);
     } else {
-      log(`[factuur] ${order.name}: Peppol-verzending staat uit (INVOICE_SEND_ENABLED).`);
+      await odoo.sendInvoice(invoiceId);
+      log(`[factuur] ${order.name}: verzonden ${viaPeppol ? 'via Peppol + ' : ''}per mail naar ${plan.email}.`);
     }
-  } else if (plan.action === 'boeken + mail') {
-    log(`[factuur] ${order.name}: buitenlands. Niet automatisch gemaild, concept voor Outlook nodig (${plan.email}).`);
   }
 }
 

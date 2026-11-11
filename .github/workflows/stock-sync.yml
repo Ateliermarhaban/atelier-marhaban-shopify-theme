@@ -69,6 +69,8 @@ jobs:
           # Zet SYNC_CUSTOMERS op 'false' (repo variable) om klant-/adressync uit te zetten.
           SYNC_CUSTOMERS: ${{ vars.SYNC_CUSTOMERS }}
           SYNC_INVOICES: ${{ vars.SYNC_INVOICES }}
+          # Factuurverzending (Peppol/mail). Pas op 'true' zetten na geslaagde DRY-run.
+          INVOICE_SEND_ENABLED: ${{ vars.INVOICE_SEND_ENABLED }}
       - name: Volgende lus starten
         # workflow_dispatch met GITHUB_TOKEN start wel degelijk een nieuwe run.
         # Door de concurrency-groep staat die in de wachtrij tot deze run klaar is.
