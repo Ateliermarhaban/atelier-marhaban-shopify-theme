@@ -357,7 +357,7 @@
         "ot_btn2": {
           "type": "button",
           "settings": {
-            "button_label": "Lees meer over Atelier Marhaban",
+            "button_label": "Mijn verhaal",
             "button_link": "shopify://pages/over-ons",
             "button_style": "link"
           }
