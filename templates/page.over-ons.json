@@ -36,7 +36,7 @@
           "type": "button",
           "settings": {
             "button_label": "Afspraak in de showroom",
-            "button_link": "shopify://pages/contact",
+            "button_link": "https://outlook.office.com/bookwithme/user/413561ed535a4dc5ba9467874c679a66@atelier-marhaban.com?anonymous",
             "button_style": "primary"
           }
         }
@@ -49,7 +49,7 @@
       ],
       "settings": {
         "image": "shopify://shop_images/am-home-thomas-atelier-marrakech.jpg",
-        "image_width": 500,
+        "image_width": 400,
         "image_link": "",
         "image_position": "left",
         "text_alignment": "left",
