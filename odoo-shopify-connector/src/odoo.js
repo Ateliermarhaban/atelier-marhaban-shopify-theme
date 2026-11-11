@@ -318,18 +318,28 @@ export async function getAllPartnerEmails() {
 }
 
 /**
- * Klant-partners (customer_rank > 0) met e-mail, inclusief adresvelden.
- * Bron voor Odoo -> Shopify.
+ * Synchroniseerbare partners: alle contacten met e-mail die GEEN leverancier zijn
+ * (supplier_rank = 0), ook als customer_rank 0 is. Interne sub-adressen
+ * (type != 'contact') en backend-/portaalgebruikers (user_ids gevuld) worden
+ * overgeslagen. Bron voor Odoo -> Shopify en voor het aanvullen van velden.
  */
-export async function listCustomerPartners() {
+export async function listSyncablePartners() {
   const results = [];
   const pageSize = 1000;
   let offset = 0;
   while (true) {
     const records = await execute('res.partner', 'search_read', [
-      [['customer_rank', '>', 0], ['email', '!=', false]],
+      [
+        ['email', '!=', false],
+        ['supplier_rank', '=', 0],
+        ['type', '=', 'contact'],
+        ['user_ids', '=', false],
+      ],
     ], {
-      fields: ['name', 'email', 'phone', 'street', 'street2', 'city', 'zip', 'country_id'],
+      fields: [
+        'name', 'email', 'phone', 'street', 'street2', 'city', 'zip',
+        'country_id', 'company_name', 'vat', 'customer_rank',
+      ],
       limit: pageSize,
       offset,
     });
@@ -341,9 +351,32 @@ export async function listCustomerPartners() {
 }
 
 /**
+ * Werk losse velden bij op een bestaande partner. Schrijft alleen de meegegeven
+ * sleutels (countryCode wordt vertaald naar country_id). Lege values worden
+ * genegeerd zodat niets per ongeluk gewist wordt.
+ */
+export async function updatePartnerFields(id, { phone, street, street2, city, zip, countryCode, company_name, vat } = {}) {
+  const values = {};
+  if (phone) values.phone = phone;
+  if (street) values.street = street;
+  if (street2) values.street2 = street2;
+  if (city) values.city = city;
+  if (zip) values.zip = zip;
+  if (company_name) values.company_name = company_name;
+  if (vat) values.vat = vat;
+  if (countryCode) {
+    const countryId = await getCountryIdByCode(countryCode);
+    if (countryId) values.country_id = countryId;
+  }
+  if (Object.keys(values).length === 0) return false;
+  await execute('res.partner', 'write', [[id], values]);
+  return true;
+}
+
+/**
  * Maak een nieuwe klant-partner aan in Odoo (customer_rank = 1).
  */
-export async function createCustomerPartner({ name, email, phone, street, street2, city, zip, countryCode }) {
+export async function createCustomerPartner({ name, email, phone, street, street2, city, zip, countryCode, company_name, vat }) {
   const values = {
     name: name || email,
     email,
@@ -354,6 +387,8 @@ export async function createCustomerPartner({ name, email, phone, street, street
   if (street2) values.street2 = street2;
   if (city) values.city = city;
   if (zip) values.zip = zip;
+  if (company_name) values.company_name = company_name;
+  if (vat) values.vat = vat;
   const countryId = await getCountryIdByCode(countryCode);
   if (countryId) values.country_id = countryId;
   return execute('res.partner', 'create', [values]);

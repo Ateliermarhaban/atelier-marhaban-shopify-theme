@@ -103,10 +103,12 @@ Volledig gratis alternatief zonder server of creditcard: een geplande taak (`.gi
 
 ## Klant-/adressynchronisatie
 
-Naast voorraad synct de connector ook **klanten en hun adres**, beide richtingen, matchend op **e-mailadres** (create-if-new):
-- **Shopify-klant → Odoo:** nieuwe Shopify-klanten worden als `res.partner` (met `customer_rank = 1`) aangemaakt als dat e-mailadres nog niet in Odoo bestaat.
-- **Odoo-klant → Shopify:** Odoo-contacten met `customer_rank > 0` worden als Shopify-klant aangemaakt als dat e-mailadres daar nog niet bestaat.
-- Alleen **echte klanten** tellen mee (geen leveranciers/overige contacten). Bestaande records worden nooit overschreven of gedupliceerd, en er ontstaat geen lus.
+Naast voorraad synct de connector ook **klanten, hun adres, bedrijfsnaam en btw-nummer**, beide richtingen, matchend op **e-mailadres**:
+- **Scope (Odoo):** alle contacten met e-mail die **geen leverancier** zijn (`supplier_rank = 0`), ook als `customer_rank = 0`. Interne sub-adressen (`type != contact`) en backend-/portaalgebruikers worden overgeslagen.
+- **Nieuw aanmaken:** ontbreekt een e-mailadres in de andere richting, dan wordt daar een klant/partner aangemaakt.
+- **Bestaande aanvullen:** bij een match worden **lege velden** in beide richtingen opgevuld (adres, telefoon, bedrijfsnaam, btw). Een **gevuld veld wordt nooit overschreven**; afwijkingen komen in de log als `[verschil]`.
+- **Bedrijfsnaam/btw:** volgen het `/pages/klantgegevens`-formulier → Shopify customer-metafields `custom.bedrijfsnaam` / `custom.btw_nummer` ↔ Odoo `company_name` / `vat`.
+- **Marketing:** een Odoo-klant die al koopt (`customer_rank > 0`) wordt bij aanmaken in Shopify op **ingeschreven** gezet (single opt-in, bron "bestaande klant"). Andere nieuwe contacten zonder toestemming. Bestaande inschrijvingen worden nooit gewijzigd, dus wie zich in Shopify heeft **uitgeschreven** blijft uitgeschreven.
 - Uitschakelen kan met repository-variable `SYNC_CUSTOMERS` = `false`.
 
 > **Vereiste Shopify-scopes:** hiervoor moet de app ook `read_customers` en `write_customers` hebben. Voeg die toe in het Dev Dashboard (nieuwe appversie → **release**) en **installeer de app opnieuw/accordeer de extra toegang** op je winkel; anders geven de klant-calls een 403.

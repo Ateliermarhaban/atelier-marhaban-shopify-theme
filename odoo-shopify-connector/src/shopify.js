@@ -256,45 +256,137 @@ export async function setAvailableByItem(inventoryItemId, qty) {
   return qty;
 }
 
+// --- GraphQL (zelfde token als REST) ---
+
+const GRAPHQL_PATH = `/graphql.json`;
+
+async function shopifyGraphql(query, variables = {}) {
+  const { json } = await shopifyRequest(GRAPHQL_PATH, { method: 'POST', body: { query, variables } });
+  if (json && json.errors) {
+    throw new Error(`Shopify GraphQL fout: ${JSON.stringify(json.errors)}`);
+  }
+  return json ? json.data : null;
+}
+
 // --- Klanten / adressen ---
 
+// Metafield-veld (namespace custom) waar het /pages/klantgegevens-formulier
+// bedrijfsnaam en btw-nummer in bewaart.
+const MF_NAMESPACE = 'custom';
+const MF_COMPANY_KEY = 'bedrijfsnaam';
+const MF_VAT_KEY = 'btw_nummer';
+
 /**
- * Alle Shopify-klanten (gepagineerd), met hun standaardadres.
+ * Alle Shopify-klanten (gepagineerd via GraphQL), inclusief standaardadres,
+ * telefoon, marketingstatus en de metafields bedrijfsnaam/btw-nummer.
+ * Geeft genormaliseerde objecten terug.
  */
 export async function listAllCustomers() {
   const out = [];
-  let path = `/customers.json?limit=250`;
-  while (path) {
-    const { json, link } = await shopifyRequest(path);
-    for (const c of json.customers || []) {
+  let after = null;
+  const query = `query($cursor: String) {
+    customers(first: 100, after: $cursor) {
+      pageInfo { hasNextPage endCursor }
+      edges { node {
+        id firstName lastName
+        defaultEmailAddress { emailAddress marketingState marketingOptInLevel }
+        defaultPhoneNumber { phoneNumber }
+        defaultAddress { address1 address2 city zip countryCodeV2 phone company }
+        mfCompany: metafield(namespace: "${MF_NAMESPACE}", key: "${MF_COMPANY_KEY}") { value }
+        mfVat: metafield(namespace: "${MF_NAMESPACE}", key: "${MF_VAT_KEY}") { value }
+      } }
+    }
+  }`;
+  while (true) {
+    const data = await shopifyGraphql(query, { cursor: after });
+    const conn = data.customers;
+    for (const { node } of conn.edges) {
+      const gid = node.id;
+      const numericId = Number(gid.split('/').pop());
+      const addr = node.defaultAddress || null;
       out.push({
-        id: c.id,
-        email: c.email,
-        first_name: c.first_name,
-        last_name: c.last_name,
-        phone: c.phone,
-        default_address: c.default_address || null,
+        id: numericId,
+        gid,
+        email: node.defaultEmailAddress ? node.defaultEmailAddress.emailAddress : '',
+        marketingState: node.defaultEmailAddress ? node.defaultEmailAddress.marketingState : 'NOT_SUBSCRIBED',
+        first_name: node.firstName || '',
+        last_name: node.lastName || '',
+        phone: (node.defaultPhoneNumber && node.defaultPhoneNumber.phoneNumber) || (addr && addr.phone) || '',
+        default_address: addr ? {
+          address1: addr.address1 || '',
+          address2: addr.address2 || '',
+          city: addr.city || '',
+          zip: addr.zip || '',
+          country_code: addr.countryCodeV2 || '',
+          phone: addr.phone || '',
+          company: addr.company || '',
+        } : null,
+        company_name: (node.mfCompany && node.mfCompany.value) || '',
+        vat: (node.mfVat && node.mfVat.value) || '',
       });
     }
-    const next = parseNextPageInfo(link);
-    path = next ? `/customers.json?limit=250&page_info=${next}` : null;
+    if (!conn.pageInfo.hasNextPage) break;
+    after = conn.pageInfo.endCursor;
   }
   return out;
 }
 
 /**
- * Maak een nieuwe Shopify-klant aan, optioneel met één adres.
+ * Maak een nieuwe Shopify-klant aan (REST). Optioneel met adres, metafields
+ * (bedrijfsnaam/btw) en marketingtoestemming (single opt-in).
  */
-export async function createCustomer({ email, firstName, lastName, phone, address }) {
+export async function createCustomer({ email, firstName, lastName, phone, address, companyName, vat, subscribe }) {
   const customer = { email };
   if (firstName) customer.first_name = firstName;
   if (lastName) customer.last_name = lastName;
   if (phone) customer.phone = phone;
-  if (address) {
-    customer.addresses = [address];
+  if (address) customer.addresses = [address];
+
+  const metafields = [];
+  if (companyName) metafields.push({ namespace: MF_NAMESPACE, key: MF_COMPANY_KEY, type: 'single_line_text_field', value: companyName });
+  if (vat) metafields.push({ namespace: MF_NAMESPACE, key: MF_VAT_KEY, type: 'single_line_text_field', value: vat });
+  if (metafields.length) customer.metafields = metafields;
+
+  if (subscribe) {
+    customer.email_marketing_consent = {
+      state: 'subscribed',
+      opt_in_level: 'single_opt_in',
+      consent_updated_at: new Date().toISOString(),
+    };
   }
   const data = await shopifyFetch('/customers.json', { method: 'POST', body: { customer } });
   return data.customer;
 }
 
-export { shopifyFetch };
+/**
+ * Vul lege native velden aan op een bestaande klant (REST PUT). Verandert nooit
+ * de marketingtoestemming. Geeft terug of er iets geschreven is.
+ */
+export async function updateCustomerNative(id, { phone, address } = {}) {
+  const customer = { id };
+  if (phone) customer.phone = phone;
+  if (address) customer.addresses = [address];
+  if (!phone && !address) return false;
+  await shopifyFetch(`/customers/${id}.json`, { method: 'PUT', body: { customer } });
+  return true;
+}
+
+/**
+ * Zet (upsert) de metafields bedrijfsnaam/btw op een klant via GraphQL.
+ * Alleen de meegegeven, niet-lege waarden worden geschreven.
+ */
+export async function setCustomerMetafields(gid, { companyName, vat } = {}) {
+  const mf = [];
+  if (companyName) mf.push({ ownerId: gid, namespace: MF_NAMESPACE, key: MF_COMPANY_KEY, type: 'single_line_text_field', value: companyName });
+  if (vat) mf.push({ ownerId: gid, namespace: MF_NAMESPACE, key: MF_VAT_KEY, type: 'single_line_text_field', value: vat });
+  if (!mf.length) return false;
+  const mutation = `mutation($mf: [MetafieldsSetInput!]!) {
+    metafieldsSet(metafields: $mf) { userErrors { field message } }
+  }`;
+  const data = await shopifyGraphql(mutation, { mf });
+  const errs = data && data.metafieldsSet && data.metafieldsSet.userErrors;
+  if (errs && errs.length) throw new Error(`metafieldsSet: ${JSON.stringify(errs)}`);
+  return true;
+}
+
+export { shopifyFetch, shopifyGraphql };
