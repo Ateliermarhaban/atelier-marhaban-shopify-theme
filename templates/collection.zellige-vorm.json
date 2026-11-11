@@ -279,9 +279,9 @@
         "video_external": "https://www.youtube.com/watch?v=TWWUhQD45zM",
         "video_description": "",
         "text_alignment": "bottom left",
-        "height_desktop": 600,
-        "height_mobile": 500,
-        "full_width": true,
+        "height_desktop": 420,
+        "height_mobile": 300,
+        "full_width": false,
         "overlay_style": "shadow"
       }
     },
