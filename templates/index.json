@@ -350,7 +350,7 @@
           "type": "button",
           "settings": {
             "button_label": "Afspraak in de showroom",
-            "button_link": "https://outlook.office.com/bookwithme/user/413561ed535a4dc5ba9467874c679a66@atelier-marhaban.com?anonymous",
+            "button_link": "https://atelier-marhaban.com/afspraak",
             "button_style": "primary"
           }
         },
