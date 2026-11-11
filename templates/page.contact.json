@@ -1,1 +1,89 @@
-{"sections":{"rich_text_dQfFaw":{"type":"rich-text","blocks":{"heading_fTzhjk":{"type":"heading","settings":{"title":"Welkom.","use_h1":false}},"text_Vnh6bC":{"type":"text","settings":{"text":"<p>Kom de stukken bekijken in de showroom in Lievegem. Kies zelf een moment in mijn agenda, of stuur hieronder een bericht.<\/p>","enlarge_text":false}},"text_yyjbKm":{"type":"text","settings":{"text":"<p>Atelier Marhaban, showroom<br>Grote Baan 358 bus 0102<br>9930 Lievegem<br>+32 9 367 06 69<\/p><p><a href=\"https:\/\/outlook.office.com\/bookwithme\/user\/413561ed535a4dc5ba9467874c679a66@atelier-marhaban.com?anonymous\">Maak een afspraak<\/a><\/p>","enlarge_text":false}}},"block_order":["heading_fTzhjk","text_Vnh6bC","text_yyjbKm"],"name":"Rich text","settings":{"height":"medium","text_alignment":"center","full_width":false,"color_scheme":"default"}},"main":{"type":"main-contact","blocks":{"name":{"type":"name_input","settings":{"half_width":true}},"email":{"type":"email_input","settings":{"half_width":true}},"message":{"type":"message_input","settings":{"half_width":false}}},"block_order":["name","email","message"],"settings":{"show_page_title":false,"use_columns":true,"contact_title":"","contact_text":""}}},"order":["rich_text_dQfFaw","main"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "rich_text_dQfFaw": {
+      "type": "rich-text",
+      "blocks": {
+        "heading_fTzhjk": {
+          "type": "heading",
+          "settings": {
+            "title": "Welkom.",
+            "use_h1": false
+          }
+        },
+        "text_Vnh6bC": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Kom de stukken bekijken in de showroom in Lievegem. Kies zelf een moment in mijn agenda, of stuur hieronder een bericht.</p>",
+            "enlarge_text": false
+          }
+        },
+        "text_yyjbKm": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Atelier Marhaban, showroom<br>Grote Baan 358 bus 0102<br>9930 Lievegem<br>+32 9 367 06 69</p><p><a href=\"https://outlook.office.com/bookwithme/user/413561ed535a4dc5ba9467874c679a66@atelier-marhaban.com?anonymous\">Maak een afspraak</a></p>",
+            "enlarge_text": false
+          }
+        }
+      },
+      "block_order": [
+        "heading_fTzhjk",
+        "text_Vnh6bC",
+        "text_yyjbKm"
+      ],
+      "name": "Rich text",
+      "settings": {
+        "height": "medium",
+        "text_alignment": "center",
+        "full_width": false,
+        "color_scheme": "default"
+      }
+    },
+    "main": {
+      "type": "main-contact",
+      "blocks": {
+        "name": {
+          "type": "name_input",
+          "settings": {
+            "half_width": true
+          }
+        },
+        "email": {
+          "type": "email_input",
+          "settings": {
+            "half_width": true
+          }
+        },
+        "message": {
+          "type": "message_input",
+          "settings": {
+            "half_width": false
+          }
+        }
+      },
+      "block_order": [
+        "name",
+        "email",
+        "message"
+      ],
+      "settings": {
+        "show_page_title": false,
+        "use_columns": true,
+        "contact_title": "",
+        "contact_text": ""
+      }
+    }
+  },
+  "order": [
+    "rich_text_dQfFaw",
+    "main"
+  ]
+}
