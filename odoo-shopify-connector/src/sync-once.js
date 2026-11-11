@@ -17,12 +17,27 @@ function log(...args) {
 
 const SYNCED_TAG = 'odoo-synced';
 
+// Orders die handmatig worden afgehandeld en NOOIT automatisch geboekt mogen
+// worden (anders dubbel afgeboekt). Match op order-naam, bv. '#AM1009'.
+// #AM1009 (8/11, SKU 105708-125-OB) staat niet in Odoo; die SKU wordt met de
+// hand op 0 gezet in beide systemen.
+const SKIP_ORDER_NAMES = new Set(['#AM1009', 'AM1009']);
+
 /** Richting 1: Shopify-verkopen (web/POS) verwerken in Odoo. */
 async function shopifyToOdoo() {
   const orders = await shopify.listUnsyncedOrders({ sinceDays: 7, syncedTag: SYNCED_TAG });
   log(`[shopify->odoo] ${orders.length} nieuwe order(s) te verwerken.`);
 
   for (const order of orders) {
+    const orderName = (order.name || '').trim();
+    if (SKIP_ORDER_NAMES.has(orderName)) {
+      log(`[shopify->odoo] Order ${orderName} handmatig uitgesloten -> overslaan (niet boeken).`);
+      // In live modus labelen zodat hij definitief uit de wachtrij valt.
+      if (!config.service.dryRun) {
+        await shopify.tagOrderSynced(order, SYNCED_TAG);
+      }
+      continue;
+    }
     let allOk = true;
     for (const item of order.line_items || []) {
       if (!item.sku) {
@@ -71,8 +86,10 @@ async function odooToShopify() {
     if (current === available) continue; // al gelijk
 
     changes++;
+    // Verschil-log per SKU (altijd, ook live): Shopify had X, Odoo wil Y.
+    log(`[verschil] ${sku}: Shopify ${current} <-> Odoo ${available} (free ${free}, offerte-res ${reservations.get(sku) || 0}).`);
     if (config.service.dryRun) {
-      log(`[odoo->shopify][DRY] ${sku}: ${current} -> ${available} (free ${free}, res ${reservations.get(sku) || 0}).`);
+      log(`[odoo->shopify][DRY] ${sku}: ${current} -> ${available} (niet weggeschreven).`);
       continue;
     }
     try {
