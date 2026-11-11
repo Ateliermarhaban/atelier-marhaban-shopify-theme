@@ -52,7 +52,7 @@ jobs:
           # --- Niet-geheime config (identifiers, geen wachtwoorden) ---
           ODOO_URL: https://ateliermarhaban.odoo.com
           ODOO_DB: ateliermarhaban
-          ODOO_LOCATION_NAME: WH/Stock
+          ODOO_LOCATION_NAME: WH/Voorraad
           SHOPIFY_SHOP: a67ee0-af.myshopify.com
           SHOPIFY_API_VERSION: '2026-10'
           SHOPIFY_LOCATION_ID: '98409709893'

@@ -60,7 +60,15 @@ export async function getStockLocationIds() {
   if (config.odoo.locationName) {
     domain.push(['complete_name', '=', config.odoo.locationName]);
   }
-  return execute('stock.location', 'search', [domain]);
+  const ids = await execute('stock.location', 'search', [domain]);
+  // Fail-fast: een verkeerde locatienaam mag NIET stilletjes leiden tot
+  // verkeerde voorraadcijfers (lege lijst -> alle locaties of null-waardes).
+  if (config.odoo.locationName && ids.length === 0) {
+    throw new Error(
+      `Odoo-locatie "${config.odoo.locationName}" bestaat niet (complete_name). Controleer ODOO_LOCATION_NAME; sync gestopt.`
+    );
+  }
+  return ids;
 }
 
 /**
