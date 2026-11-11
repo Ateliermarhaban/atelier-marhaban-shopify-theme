@@ -346,7 +346,7 @@ export async function listSyncablePartners() {
     ], {
       fields: [
         'name', 'email', 'phone', 'street', 'street2', 'city', 'zip',
-        'country_id', 'company_name', 'vat', 'customer_rank',
+        'country_id', 'vat', 'customer_rank', 'parent_id',
       ],
       limit: pageSize,
       offset,
@@ -355,7 +355,65 @@ export async function listSyncablePartners() {
     if (records.length < pageSize) break;
     offset += pageSize;
   }
+
+  // Odoo 20 kent geen company_name op personen. Bedrijfsnaam = naam van het
+  // gekoppelde bedrijf (parent_id, is_company). Btw = vat van het bedrijf,
+  // met het eigen vat van de persoon als fallback.
+  const parentIds = [...new Set(results.map((r) => r.parent_id && r.parent_id[0]).filter(Boolean))];
+  const parents = new Map();
+  for (let i = 0; i < parentIds.length; i += 1000) {
+    const chunk = parentIds.slice(i, i + 1000);
+    const recs = await execute('res.partner', 'read', [chunk], { fields: ['name', 'vat', 'is_company'] });
+    for (const r of recs) parents.set(r.id, r);
+  }
+  for (const r of results) {
+    const parent = r.parent_id ? parents.get(r.parent_id[0]) : null;
+    r.parentId = parent ? parent.id : null;
+    r.company_name = parent && parent.is_company ? parent.name : '';
+    r.vat = (parent && parent.vat) || r.vat || '';
+  }
   return results;
+}
+
+/** Normaliseer btw-nummer voor vergelijking (spaties/punten weg, hoofdletters). */
+const normVat = (v) => String(v || '').replace(/[\s.]/g, '').toUpperCase();
+
+/**
+ * Zoek een bestaand bedrijf (is_company) op btw-nummer, anders op exacte naam.
+ * Bestaat het niet, dan wordt het aangemaakt met naam en btw. Geeft het id terug.
+ */
+export async function findOrCreateCompany({ name, vat }) {
+  const cleanVat = normVat(vat);
+  if (cleanVat) {
+    const byVat = await execute('res.partner', 'search_read', [
+      [['is_company', '=', true], ['vat', '!=', false]],
+    ], { fields: ['vat'], limit: 0 });
+    const hit = byVat.find((r) => normVat(r.vat) === cleanVat);
+    if (hit) return hit.id;
+  }
+  if (name) {
+    const byName = await execute('res.partner', 'search', [
+      [['is_company', '=', true], ['name', '=', name]],
+    ], { limit: 1 });
+    if (byName.length) return byName[0];
+  }
+  return execute('res.partner', 'create', [{
+    name: name || cleanVat,
+    is_company: true,
+    ...(vat ? { vat: String(vat).trim() } : {}),
+  }]);
+}
+
+/**
+ * Koppel een persoon aan een bedrijf via parent_id. Schrijft alleen als er nog
+ * géén parent_id staat: een bestaande koppeling wordt nooit overschreven.
+ */
+export async function linkPartnerToCompany(partnerId, { name, vat }) {
+  const [partner] = await execute('res.partner', 'read', [[partnerId]], { fields: ['parent_id'] });
+  if (partner && partner.parent_id) return false;
+  const companyId = await findOrCreateCompany({ name, vat });
+  await execute('res.partner', 'write', [[partnerId], { parent_id: companyId }]);
+  return true;
 }
 
 /**
@@ -363,15 +421,13 @@ export async function listSyncablePartners() {
  * sleutels (countryCode wordt vertaald naar country_id). Lege values worden
  * genegeerd zodat niets per ongeluk gewist wordt.
  */
-export async function updatePartnerFields(id, { phone, street, street2, city, zip, countryCode, company_name, vat } = {}) {
+export async function updatePartnerFields(id, { phone, street, street2, city, zip, countryCode } = {}) {
   const values = {};
   if (phone) values.phone = phone;
   if (street) values.street = street;
   if (street2) values.street2 = street2;
   if (city) values.city = city;
   if (zip) values.zip = zip;
-  if (company_name) values.company_name = company_name;
-  if (vat) values.vat = vat;
   if (countryCode) {
     const countryId = await getCountryIdByCode(countryCode);
     if (countryId) values.country_id = countryId;
@@ -395,9 +451,11 @@ export async function createCustomerPartner({ name, email, phone, street, street
   if (street2) values.street2 = street2;
   if (city) values.city = city;
   if (zip) values.zip = zip;
-  if (company_name) values.company_name = company_name;
-  if (vat) values.vat = vat;
   const countryId = await getCountryIdByCode(countryCode);
   if (countryId) values.country_id = countryId;
+  // Bedrijf via parent_id (btw hoort bij het bedrijf, niet bij de persoon).
+  if (company_name || vat) {
+    values.parent_id = await findOrCreateCompany({ name: company_name, vat });
+  }
   return execute('res.partner', 'create', [values]);
 }

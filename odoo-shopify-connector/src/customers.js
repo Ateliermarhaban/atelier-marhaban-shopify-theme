@@ -29,6 +29,8 @@ function log(...args) {
 const norm = (email) => (email || '').trim().toLowerCase();
 const isEmpty = (v) => v === null || v === undefined || String(v).trim() === '';
 const val = (v) => (v === null || v === undefined ? '' : String(v).trim());
+const normVat = (v) => String(v || '').replace(/[\s.]/g, '').toUpperCase();
+let bSubscribed = 0; // nieuwe Shopify-klanten met marketingtoestemming (richting B)
 
 /** Odoo-partnergegevens uit een Shopify-klant (voor aanmaken in Odoo). */
 function partnerFromShopifyCustomer(c) {
@@ -117,8 +119,6 @@ export async function syncCustomers() {
       ['street2', addr.address2 || '', val(p.street2)],
       ['city', addr.city || '', val(p.city)],
       ['zip', addr.zip || '', val(p.zip)],
-      ['company_name', c.company_name || addr.company || '', val(p.company_name)],
-      ['vat', c.vat || '', val(p.vat)],
     ];
     const update = {};
     let filledThis = false, diffThis = false;
@@ -135,6 +135,25 @@ export async function syncCustomers() {
     else if (!isEmpty(odooCountry) && !isEmpty(shopCountry) && odooCountry !== shopCountry) {
       diffThis = true;
       log(`[verschil][${email}] land: Odoo "${odooCountry}" <-> Shopify "${shopCountry}" (niet overschreven).`);
+    }
+
+    // Bedrijf/btw: persoon koppelen aan een bedrijf via parent_id. Een bestaande
+    // parent_id wordt nooit overschreven (linkPartnerToCompany controleert dat).
+    const shopCompany = c.company_name || addr.company || '';
+    const shopVat = c.vat || '';
+    if (!p.parentId && (shopCompany || shopVat)) {
+      filledThis = true;
+      if (dry) log(`[klanten][DRY][A] Bedrijf koppelen ${email}: ${shopCompany || shopVat}.`);
+      else {
+        try { await odoo.linkPartnerToCompany(p.id, { name: shopCompany, vat: shopVat }); log(`[klanten][A] Bedrijf gekoppeld ${email}.`); }
+        catch (err) { log(`[klanten][A] FOUT bedrijf ${email}:`, err.message); }
+      }
+    }
+    if (!isEmpty(p.company_name) && !isEmpty(shopCompany) && val(p.company_name) !== val(shopCompany)) {
+      diffThis = true; log(`[verschil][${email}] bedrijfsnaam: Odoo "${val(p.company_name)}" <-> Shopify "${val(shopCompany)}" (niet overschreven).`);
+    }
+    if (!isEmpty(p.vat) && !isEmpty(shopVat) && normVat(p.vat) !== normVat(shopVat)) {
+      diffThis = true; log(`[verschil][${email}] btw: Odoo "${val(p.vat)}" <-> Shopify "${val(shopVat)}" (niet overschreven).`);
     }
 
     if (diffThis) aDiff++;
@@ -157,6 +176,7 @@ export async function syncCustomers() {
     if (!shopEmails.has(email)) {
       const data = await shopifyCustomerFromPartner(p);
       bNew++;
+      if (data.subscribe) bSubscribed++;
       if (dry) { log(`[klanten][DRY][B] Shopify-klant aanmaken: ${data.email}${data.subscribe ? ' (ingeschreven, bron bestaande klant)' : ''}.`); continue; }
       try { await shopify.createCustomer(data); log(`[klanten][B] Shopify-klant aangemaakt: ${data.email}.`); }
       catch (err) { log(`[klanten][B] FOUT aanmaken ${data.email}:`, err.message); bNew--; }
@@ -226,5 +246,5 @@ export async function syncCustomers() {
 
   const w = dry ? 'zou' : '';
   log(`[klanten] Richting A (Shopify->Odoo): ${w} nieuw ${aNew}, aangevuld ${aFilled}, verschillend ${aDiff}.`);
-  log(`[klanten] Richting B (Odoo->Shopify): ${w} nieuw ${bNew}, aangevuld ${bFilled}, verschillend ${bDiff}.`);
+  log(`[klanten] Richting B (Odoo->Shopify): ${w} nieuw ${bNew} (waarvan ${bSubscribed} met toestemming, bron bestaande klant), aangevuld ${bFilled}, verschillend ${bDiff}.`);
 }
