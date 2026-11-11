@@ -27,7 +27,7 @@
   <meta property="og:image:width" content="{{ page_image.width }}">
   <meta property="og:image:height" content="{{ page_image.height }}">
 {%- else -%}
-  {%- assign og_fallback = 'am-home-hero-zellige-hand.jpg' | file_img_url: '1200x' -%}
+  {%- assign og_fallback = images['am-home-hero-zellige-hand.jpg'] | image_url: width: 1200 -%}
   <meta property="og:image" content="https:{{ og_fallback }}">
   <meta property="og:image:secure_url" content="https:{{ og_fallback }}">
   <meta property="og:image:alt" content="Handgemaakte zelliges van Atelier Marhaban">
