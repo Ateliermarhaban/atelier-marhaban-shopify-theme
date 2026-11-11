@@ -1,19 +1,20 @@
 // Facturen voor POS-verkopen aan klanten met een btw-nummer.
 //
-// Per Shopify-POS-bestelling waarvan de klant een btw-nummer heeft en die nog
-// de tag `factuur-odoo` mist:
-//  - bedrijf zoeken op btw-nummer (nooit op naam) of aanmaken; persoon als contact
-//  - adres aanvullen uit Shopify, of via VIES (openbare EU-dienst) als het ontbreekt
-//  - klantfactuur op dagboek Sales (INV, id 9), regels en eenheidsprijzen
-//    uit de bestelling, btw "21% incl." (prijzen zijn incl. btw), referentie SHOP-<nr>
-//  - GEEN voorraadbeweging: die is al verwerkt door de voorraadsync
-//  - de eerste 5 facturen blijven in concept; daarna boeken + betaling
-//  - betaling als MISC-boeking, afgepunt tegen de factuur
-//  - verzending via Peppol alleen voor Belgische klanten die Peppol-geverifieerd zijn,
-//    en alleen als INVOICE_SEND_ENABLED=true (standaard uit)
-//  - concept blijft staan en wordt gelogd bij: geen adres, ongeldig VIES, afwijkend
-//    totaal, ontbrekende btw-taks of product
-//  - daarna krijgt de bestelling de tag factuur-odoo
+// Per POS-bestelling met btw-nummer en zonder tag `factuur-odoo`:
+//  1. PLAN (read-only, ook in dry-run): bedrijf op btw-nummer, adres, Peppol,
+//     taks, producten, totaal, eerste-5-regel. Daaruit één logregel [factuur].
+//  2. ACTIE (alleen live): concept-factuur, of boeken + betaling (MISC),
+//     en verzending volgens het plan. Daarna tag factuur-odoo.
+//
+// Actie per bestelling:
+//   "boeken + Peppol + mail"     BE-klant met Peppol-geverifieerd. Verzending via Peppol
+//                                 (alleen als INVOICE_SEND_ENABLED=true).
+//   "boeken + mail"              buitenlandse klant met e-mail. Geboekt; mail is
+//                                 een concept voor Outlook (niet automatisch).
+//   "boeken, niet versturen (PEPPOL-ONTBREEKT)"  BE-klant zonder Peppol.
+//   "concept (reden)"            blijft in concept; reden staat in de log.
+//
+// Geen voorraadbeweging: die is al verwerkt door de voorraadsync.
 
 import * as odoo from './odoo.js';
 import * as shopify from './shopify.js';
@@ -23,6 +24,8 @@ const INVOICE_TAG = 'factuur-odoo';
 const SALES_JOURNAL_ID = 9; // Dagboek "Sales", code INV
 const TAX_NAME = '21% incl.';
 const FIRST_DRAFTS = 5;
+// Bestellingen die bewust nooit gefactureerd worden (zoals #AM1009 in de voorraadsync).
+const SKIP_ORDER_NAMES = new Set(['#AM1008']); // eigen testverkoop (TJM)
 const SEND_ENABLED = String(process.env.INVOICE_SEND_ENABLED || '').toLowerCase() === 'true';
 
 function log(...args) {
@@ -32,26 +35,23 @@ function log(...args) {
 const normVat = (v) => String(v || '').replace(/[\s.]/g, '').toUpperCase();
 const round2 = (n) => Math.round(n * 100) / 100;
 
-/** VIES-lookup. Geeft { valid, name, street, zip, city } terug, of { valid:false }. */
+/** VIES-lookup (openbare EU-dienst). Alleen het btw-nummer wordt verstuurd. */
 async function viesLookup(vat) {
   const clean = normVat(vat);
-  const cc = clean.slice(0, 2);
-  const num = clean.slice(2);
   try {
     const res = await fetch(
-      `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/${cc}/vat/${num}`,
+      `https://ec.europa.eu/taxation_customs/vies/rest-api/ms/${clean.slice(0, 2)}/vat/${clean.slice(2)}`,
       { headers: { Accept: 'application/json' } }
     );
     if (!res.ok) return { valid: false };
     const json = await res.json();
-    const clean2 = (s) => (s && s.trim() !== '---' ? s.trim() : '');
-    const lines = clean2(json.address).split('\n').map((l) => l.trim()).filter(Boolean);
-    const street = lines[0] || '';
+    const txt = (s) => (s && s.trim() !== '---' ? s.trim() : '');
+    const lines = txt(json.address).split('\n').map((l) => l.trim()).filter(Boolean);
     const zipCity = (lines[lines.length - 1] || '').match(/^(\S+)\s+(.+)$/);
     return {
       valid: json.isValid === true,
-      name: clean2(json.name),
-      street: lines.length > 1 ? street : '',
+      name: txt(json.name),
+      street: lines.length > 1 ? lines[0] : '',
       zip: zipCity ? zipCity[1] : '',
       city: zipCity ? zipCity[2] : '',
     };
@@ -61,13 +61,13 @@ async function viesLookup(vat) {
   }
 }
 
-/** Betaalmethode uit de Shopify-gateway: cash of kaart. */
+/** Betaalwijze uit de Shopify-gateway: cash of kaart. */
 function paymentMethod(order) {
   const gateways = (order.payment_gateway_names || []).join(' ').toLowerCase();
   return /cash|kas|contant/.test(gateways) ? 'cash' : 'card';
 }
 
-/** Factuurregels uit de bestelling (prijzen incl. btw, na korting). */
+/** Factuurregels (prijzen incl. btw, na korting). Read-only. */
 async function buildLines(order, taxId) {
   const lines = [];
   const notes = [];
@@ -75,7 +75,7 @@ async function buildLines(order, taxId) {
     const qty = Number(item.quantity) || 1;
     const unit = round2((Number(item.price) * qty - Number(item.total_discount || 0)) / qty);
     const productId = item.sku ? await odoo.findProductBySku(item.sku) : null;
-    if (!productId) notes.push(`product ${item.sku || item.title} niet gevonden in Odoo`);
+    if (!productId) notes.push(`product ${item.sku || item.title} niet in Odoo`);
     lines.push({
       name: item.title,
       quantity: qty,
@@ -91,111 +91,159 @@ async function buildLines(order, taxId) {
   return { lines, notes };
 }
 
-async function invoiceOrder(order, info) {
-  const orderNr = order.name.replace('#', '');
-  const ref = `SHOP-${orderNr}`;
-  const concept = []; // redenen om in concept te laten
+/**
+ * Plan per bestelling. Leest alleen (geen aanmaak, geen boeking), zodat dit ook
+ * in dry-run draait en dezelfde beslissing oplevert als de live run.
+ */
+async function planOrder(order, info, taxId) {
+  const ba = order.billing_address || {};
+  const companyName = info.company || ba.company
+    || [order.customer.first_name, order.customer.last_name].filter(Boolean).join(' ') || info.email;
+  const existingId = await odoo.findCompanyIdByVat(info.vat);
+  const reasons = [];
 
-  // 1. Bedrijf op btw-nummer (nooit op naam).
-  const billing = order.billing_address || {};
-  const companyName = info.company || billing.company
-    || [billing.first_name, billing.last_name].filter(Boolean).join(' ') || info.email;
-  const { id: companyId, created } = await odoo.findOrCreateCompanyByVat({ name: companyName, vat: info.vat });
-  if (created) log(`[factuur] Bedrijf aangemaakt voor ${info.vat} (${companyName}).`);
-
-  // 2. Contactpersoon onder het bedrijf.
-  const personName = [order.customer.first_name, order.customer.last_name].filter(Boolean).join(' ') || info.email;
-  if (info.email) await odoo.findOrCreatePersonUnder(companyId, { name: personName, email: info.email });
-
-  // 3. Adres: Shopify-billing eerst, dan VIES. Niets overschrijven.
-  let street = billing.address1 || '';
-  let zip = billing.zip || '';
-  let city = billing.city || '';
-  let country = billing.country_code || '';
-  const current = await odoo.getCompanyFields(companyId);
-  if (!current.street && !street) {
-    const v = await viesLookup(info.vat);
-    if (!v.valid) concept.push('ongeldig VIES-nummer');
-    else {
-      street = v.street; zip = v.zip; city = v.city;
-      if (!street) concept.push('VIES geeft geen adres (bv. DE/ES), en Shopify heeft geen adres');
-    }
-    if (!country) country = normVat(info.vat).slice(0, 2);
+  // Adres: bestaand bedrijf, dan Shopify-billing, dan VIES.
+  let hasAddress = false;
+  let vies = null;
+  let peppolState = null;
+  let companyCountry = '';
+  if (existingId) {
+    const f = await odoo.getCompanyFields(existingId);
+    peppolState = f.peppol_verification_state || null;
+    hasAddress = !!(f.street && f.zip && f.city);
+    companyCountry = f.country_id ? await odoo.getCountryCodeById(f.country_id[0]) : '';
   }
-  await odoo.fillCompanyAddress(companyId, { street, zip, city, countryCode: country });
-  const after = await odoo.getCompanyFields(companyId);
-  if (!after.street || !after.zip || !after.city) concept.push('adres onvolledig');
-
-  // 4. Btw-taks en regels.
-  const taxId = await odoo.getTaxIdByName(TAX_NAME);
-  if (!taxId) {
-    log(`[factuur] ${ref}: btw-taks "${TAX_NAME}" ontbreekt in Odoo. Overgeslagen, niet getagd.`);
-    return;
+  if (!hasAddress && ba.address1 && ba.zip && ba.city) hasAddress = true;
+  if (!hasAddress) {
+    vies = await viesLookup(info.vat);
+    if (!vies.valid) reasons.push('ongeldig VIES-nummer');
+    else if (!vies.street) reasons.push('VIES geeft geen adres');
+    else hasAddress = true;
   }
-  const { lines, notes } = await buildLines(order, taxId);
-  concept.push(...notes);
+  if (!hasAddress) reasons.push('geen adres');
+  if (!taxId) reasons.push(`btw-taks "${TAX_NAME}" ontbreekt`);
 
-  // 5. Concept-factuur. Geen voorraadbeweging.
+  const { lines, notes } = taxId ? await buildLines(order, taxId) : { lines: [], notes: [] };
+  reasons.push(...notes);
+
+  const sum = lines.reduce((s, l) => s + l.price_unit * l.quantity, 0);
+  const expected = Number(order.total_price);
+  if (taxId && Math.abs(round2(sum) - expected) > 0.01) {
+    reasons.push(`totaal ${round2(sum)} wijkt af van Shopify ${expected}`);
+  }
+
+  const n = await odoo.countConnectorInvoices();
+  if (n < FIRST_DRAFTS) reasons.push(`eerste ${FIRST_DRAFTS} facturen blijven in concept (nr ${n + 1})`);
+
+  // Peppol: alleen BE en geverifieerd. Buitenlands: geen Peppol.
+  const isBE = (companyCountry || normVat(info.vat).slice(0, 2)) === 'BE';
+  const peppol = isBE && peppolState === 'valid';
+  const email = info.email || order.customer.email || '';
+
+  let action;
+  if (reasons.length) action = `concept (${reasons.join('; ')})`;
+  else if (peppol) action = 'boeken + Peppol + mail';
+  else if (isBE) action = 'boeken, niet versturen (PEPPOL-ONTBREEKT)';
+  else action = 'boeken + mail';
+
+  return {
+    existingId, companyName, vat: normVat(info.vat), email, peppol, peppolState,
+    method: paymentMethod(order), total: expected, action, reasons, lines, vies, isBE,
+  };
+}
+
+function logPlan(order, info, plan) {
+  const cust = `${order.customer.first_name || ''} ${order.customer.last_name || ''}`.trim();
+  log(
+    `[factuur] ${order.name} | klant ${cust || '-'} | bedrijf ${plan.companyName} | btw ${plan.vat}` +
+    ` | totaal ${plan.total.toFixed(2)} incl. btw | betaling ${plan.method}` +
+    ` | partner ${plan.existingId ? plan.existingId : 'nieuw'}` +
+    ` | Peppol ${plan.peppol ? 'ja' : 'nee'} (${plan.peppolState || 'onbekend'})` +
+    ` | mail naar ${plan.email || '-'} | ${plan.action}`
+  );
+}
+
+/** Live: uitvoeren van het plan. Alleen aangeroepen als niet dry-run. */
+async function executePlan(order, info, plan) {
+  const ref = `SHOP-${order.name.replace('#', '')}`;
   const date = (order.created_at || '').slice(0, 10);
+
+  // Bedrijf: bestaand, of aanmaken op btw-nummer.
+  const { id: companyId, created } = await odoo.findOrCreateCompanyByVat({ name: plan.companyName, vat: plan.vat });
+  if (created) log(`[factuur] ${order.name}: bedrijf aangemaakt (${plan.vat}).`);
+  // Contactpersoon.
+  const personName = [order.customer.first_name, order.customer.last_name].filter(Boolean).join(' ') || plan.email;
+  if (plan.email) await odoo.findOrCreatePersonUnder(companyId, { name: personName, email: plan.email });
+
+  // Adres aanvullen (overschrijft niets).
+  const ba = order.billing_address || {};
+  const vies = plan.vies;
+  await odoo.fillCompanyAddress(companyId, {
+    street: ba.address1 || (vies && vies.street) || '',
+    zip: ba.zip || (vies && vies.zip) || '',
+    city: ba.city || (vies && vies.city) || '',
+    countryCode: ba.country_code || plan.vat.slice(0, 2),
+  });
+
   const invoiceId = await odoo.createDraftInvoice({
-    partnerId: companyId, journalId: SALES_JOURNAL_ID, ref, date, lines,
+    partnerId: companyId, journalId: SALES_JOURNAL_ID, ref, date, lines: plan.lines,
   });
   const inv = await odoo.readInvoice(invoiceId);
-  const expected = Number(order.total_price);
-  if (Math.abs(inv.amount_total - expected) > 0.01) {
-    concept.push(`totaal ${inv.amount_total} wijkt af van Shopify ${expected}`);
+  if (Math.abs(inv.amount_total - plan.total) > 0.01) {
+    log(`[factuur] ${order.name}: totaal Odoo ${inv.amount_total} <> Shopify ${plan.total}. Blijft concept.`);
+    return;
+  }
+  if (plan.action.startsWith('concept')) {
+    log(`[factuur] ${order.name}: concept aangemaakt (${inv.name || invoiceId}). ${plan.action}`);
+    return;
   }
 
-  // 6. Eerste 5 blijven in concept; daarna boeken en betalen.
-  const n = await odoo.countConnectorInvoices();
-  if (n <= FIRST_DRAFTS) concept.push(`eerste ${FIRST_DRAFTS} facturen blijven in concept (nr ${n})`);
+  // Boeken en betalen.
+  await odoo.postInvoice(invoiceId);
+  const payId = await odoo.createPaymentEntry({
+    ref: `${ref}-betaling`, date, companyId, method: plan.method, amount: plan.total,
+  });
+  await odoo.postInvoice(payId);
+  await odoo.reconcileWithInvoice(invoiceId, payId, companyId);
+  log(`[factuur] ${order.name}: geboekt en betaald (${plan.method}).`);
 
-  if (concept.length) {
-    log(`[factuur] ${ref}: CONCEPT (${inv.name || invoiceId}). Reden: ${concept.join('; ')}.`);
-  } else {
-    await odoo.postInvoice(invoiceId);
-    const method = paymentMethod(order);
-    const payId = await odoo.createPaymentEntry({
-      ref: `${ref}-betaling`, date, companyId, method, amount: expected,
-    });
-    await odoo.postInvoice(payId); // action_post werkt ook voor MISC-boekingen
-    await odoo.reconcileWithInvoice(invoiceId, payId, companyId);
-    log(`[factuur] ${ref}: geboekt en betaald (${method}).`);
-
-    // Verzending: Peppol alleen voor Belgische, Peppol-geverifieerde klanten.
-    const isBE = (after.country_id ? await odoo.getCountryCodeById(after.country_id[0]) : '') === 'BE';
-    const peppol = isBE && await odoo.setPeppolIfVerified(companyId);
-    if (!peppol) {
-      log(`[factuur] ${ref}: niet via Peppol (buitenlands of niet geverifieerd). NIET gemaild; concept voor Outlook nodig.`);
-    } else if (SEND_ENABLED) {
+  if (plan.action === 'boeken + Peppol + mail') {
+    await odoo.setPeppolIfVerified(companyId);
+    if (SEND_ENABLED) {
       await odoo.sendInvoice(invoiceId);
-      log(`[factuur] ${ref}: verzonden via Peppol.`);
+      log(`[factuur] ${order.name}: verzonden via Peppol.`);
     } else {
-      log(`[factuur] ${ref}: Peppol-verzending staat uit (INVOICE_SEND_ENABLED).`);
+      log(`[factuur] ${order.name}: Peppol-verzending staat uit (INVOICE_SEND_ENABLED).`);
     }
+  } else if (plan.action === 'boeken + mail') {
+    log(`[factuur] ${order.name}: buitenlands. Niet automatisch gemaild, concept voor Outlook nodig (${plan.email}).`);
   }
-
-  // 7. Tag, zodat de bestelling niet opnieuw wordt verwerkt.
-  await shopify.tagOrderSynced(order, INVOICE_TAG);
 }
 
 export async function syncInvoices() {
+  const taxId = await odoo.getTaxIdByName(TAX_NAME);
   const orders = await shopify.listPosOrdersNeedingInvoice({ sinceDays: 7, invoiceTag: INVOICE_TAG });
-  log(`[factuur] ${orders.length} POS-bestelling(en) zonder factuur.`);
-  for (const order of orders) {
-    const ref = order.name;
-    if (!order.customer) continue; // anonieme POS-verkoop: geen factuur
-    const info = await shopify.getCustomerVatInfo(order.customer.id);
-    if (!info || !normVat(info.vat)) continue; // geen btw-nummer: niet hier
+  const dry = config.service.dryRun;
+  log(`[factuur] ${orders.length} POS-bestelling(en) zonder factuur${dry ? ' (dry-run)' : ''}.`);
 
-    if (config.service.dryRun) {
-      log(`[factuur][DRY] ${ref}: factuur voor ${info.vat} (${info.company || info.email}), ${order.line_items.length} regel(s), ${order.total_price}.`);
+  for (const order of orders) {
+    if (SKIP_ORDER_NAMES.has(order.name)) {
+      log(`[factuur] ${order.name} handmatig uitgesloten -> overslaan.`);
       continue;
     }
+    if (!order.customer) continue; // anonieme POS-verkoop
+    const info = await shopify.getCustomerVatInfo(order.customer.id);
+    if (!info || !normVat(info.vat)) continue; // geen btw-nummer
+    const infoN = { ...info, vat: normVat(info.vat) };
+
     try {
-      await invoiceOrder(order, { ...info, vat: normVat(info.vat) });
+      const plan = await planOrder(order, infoN, taxId);
+      logPlan(order, infoN, plan);
+      if (dry) continue;
+      await executePlan(order, infoN, plan);
+      await shopify.tagOrderSynced(order, INVOICE_TAG);
     } catch (err) {
-      log(`[factuur] FOUT ${ref}:`, err.message);
+      log(`[factuur] FOUT ${order.name}:`, err.message);
     }
   }
 }

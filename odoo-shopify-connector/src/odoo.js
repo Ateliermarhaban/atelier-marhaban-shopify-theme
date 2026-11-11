@@ -615,3 +615,14 @@ export async function reconcileWithInvoice(invoiceId, paymentId, companyId) {
 export async function sendInvoice(invoiceId) {
   return execute('account.move', 'action_send_and_print', [[invoiceId]]);
 }
+
+/** Read-only: id van een bestaand bedrijf op btw-nummer, of null. Maakt niets aan. */
+export async function findCompanyIdByVat(vat) {
+  const clean = normVat(vat);
+  if (!clean) return null;
+  const companies = await execute('res.partner', 'search_read', [
+    [['is_company', '=', true], ['vat', '!=', false]],
+  ], { fields: ['vat'], limit: 0 });
+  const hit = companies.find((r) => normVat(r.vat) === clean);
+  return hit ? hit.id : null;
+}
