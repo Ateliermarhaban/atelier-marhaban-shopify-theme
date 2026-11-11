@@ -10,6 +10,7 @@ import * as odoo from './odoo.js';
 import * as shopify from './shopify.js';
 import { config } from './config.js';
 import { syncCustomers } from './customers.js';
+import { syncInvoices } from './invoices.js';
 
 function log(...args) {
   console.log(new Date().toISOString(), ...args);
@@ -113,6 +114,15 @@ async function main() {
       await syncCustomers();
     } catch (err) {
       log('[klanten] FOUT:', err.message);
+    }
+  }
+  // POS-facturen voor klanten met btw-nummer. Standaard UIT: zet SYNC_INVOICES=true
+  // (repo-variabele) pas na een geslaagde DRY-run.
+  if (String(process.env.SYNC_INVOICES || '').toLowerCase() === 'true') {
+    try {
+      await syncInvoices();
+    } catch (err) {
+      log('[factuur] FOUT:', err.message);
     }
   }
   log('Batch-sync klaar.');

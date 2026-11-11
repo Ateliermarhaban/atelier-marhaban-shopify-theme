@@ -403,3 +403,46 @@ export async function setCustomerMetafields(gid, { companyName, vat } = {}) {
 }
 
 export { shopifyFetch, shopifyGraphql };
+
+// --- Facturatie: POS-orders die nog geen factuur hebben ---
+
+/**
+ * POS-bestellingen van de laatste sinceDays dagen zonder de factuur-tag.
+ */
+export async function listPosOrdersNeedingInvoice({ sinceDays = 7, invoiceTag = 'factuur-odoo' } = {}) {
+  const since = new Date(Date.now() - sinceDays * 86400000).toISOString();
+  const out = [];
+  let path = `/orders.json?status=any&limit=250&created_at_min=${encodeURIComponent(since)}`;
+  while (path) {
+    const { json, link } = await shopifyRequest(path);
+    for (const order of json.orders || []) {
+      if (order.source_name !== 'pos') continue;
+      const tags = (order.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
+      if (!tags.includes(invoiceTag)) out.push(order);
+    }
+    const next = parseNextPageInfo(link);
+    path = next ? `/orders.json?limit=250&page_info=${next}` : null;
+  }
+  return out;
+}
+
+/**
+ * Btw-nummer, bedrijfsnaam en e-mail van een klant (via GraphQL: de metafields
+ * komen uit het klantgegevens-formulier).
+ */
+export async function getCustomerVatInfo(customerId) {
+  const data = await shopifyGraphql(`query($id: ID!) {
+    customer(id: $id) {
+      defaultEmailAddress { emailAddress }
+      mfVat: metafield(namespace: "${MF_NAMESPACE}", key: "${MF_VAT_KEY}") { value }
+      mfCompany: metafield(namespace: "${MF_NAMESPACE}", key: "${MF_COMPANY_KEY}") { value }
+    }
+  }`, { id: `gid://shopify/Customer/${customerId}` });
+  const c = data && data.customer;
+  if (!c) return null;
+  return {
+    email: c.defaultEmailAddress ? c.defaultEmailAddress.emailAddress : '',
+    vat: (c.mfVat && c.mfVat.value) || '',
+    company: (c.mfCompany && c.mfCompany.value) || '',
+  };
+}

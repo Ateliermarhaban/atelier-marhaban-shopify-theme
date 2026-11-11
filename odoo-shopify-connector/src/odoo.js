@@ -459,3 +459,159 @@ export async function createCustomerPartner({ name, email, phone, street, street
   }
   return execute('res.partner', 'create', [values]);
 }
+
+// --- Facturatie (POS-verkopen met btw-nummer) ---
+
+/**
+ * Zoek een bedrijf UITSLUITEND op btw-nummer (vat), nooit op naam, zodat er geen
+ * duplicaten ontstaan zoals "BE0460915888, Gryp Vloeren". Bestaat het niet, dan
+ * wordt het aangemaakt.
+ */
+export async function findOrCreateCompanyByVat({ name, vat }) {
+  const clean = normVat(vat);
+  if (!clean) throw new Error('Geen btw-nummer opgegeven.');
+  const companies = await execute('res.partner', 'search_read', [
+    [['is_company', '=', true], ['vat', '!=', false]],
+  ], { fields: ['vat', 'name'], limit: 0 });
+  const hit = companies.find((r) => normVat(r.vat) === clean);
+  if (hit) return { id: hit.id, created: false };
+  const id = await execute('res.partner', 'create', [{
+    name: name || clean,
+    vat: String(vat).trim(),
+    is_company: true,
+  }]);
+  return { id, created: true };
+}
+
+/** Contactpersoon onder een bedrijf, op e-mail. Maakt aan als die ontbreekt. */
+export async function findOrCreatePersonUnder(companyId, { name, email }) {
+  const found = await execute('res.partner', 'search', [
+    [['parent_id', '=', companyId], ['email', '=ilike', email]],
+  ], { limit: 1 });
+  if (found.length) return found[0];
+  return execute('res.partner', 'create', [{
+    name: name || email,
+    email,
+    parent_id: companyId,
+    type: 'contact',
+  }]);
+}
+
+export async function getCompanyFields(companyId) {
+  const [rec] = await execute('res.partner', 'read', [[companyId]], {
+    fields: ['street', 'street2', 'city', 'zip', 'country_id', 'peppol_verification_state', 'invoice_sending_method', 'invoice_edi_format'],
+  });
+  return rec;
+}
+
+/** Vul ontbrekende adresvelden van een bedrijf aan (overschrijft niets). */
+export async function fillCompanyAddress(companyId, { street, zip, city, countryCode }) {
+  const current = await getCompanyFields(companyId);
+  const values = {};
+  if (!current.street && street) values.street = street;
+  if (!current.zip && zip) values.zip = zip;
+  if (!current.city && city) values.city = city;
+  if (!current.country_id && countryCode) {
+    const cid = await getCountryIdByCode(countryCode);
+    if (cid) values.country_id = cid;
+  }
+  if (Object.keys(values).length) await execute('res.partner', 'write', [[companyId], values]);
+  return Object.keys(values);
+}
+
+/** Zet Peppol-verzending op een bedrijf, alleen als het Peppol-geverifieerd is. */
+export async function setPeppolIfVerified(companyId) {
+  const c = await getCompanyFields(companyId);
+  if (c.peppol_verification_state !== 'valid') return false;
+  await execute('res.partner', 'write', [[companyId], {
+    invoice_sending_method: 'peppol',
+    invoice_edi_format: 'ubl_bis3',
+  }]);
+  return true;
+}
+
+export async function getTaxIdByName(name) {
+  const ids = await execute('account.tax', 'search', [[['name', '=', name], ['type_tax_use', '=', 'sale']]], { limit: 1 });
+  return ids.length ? ids[0] : null;
+}
+
+export async function getAccountIdByCode(code) {
+  const ids = await execute('account.account', 'search', [[['code', '=', code]]], { limit: 1 });
+  return ids.length ? ids[0] : null;
+}
+
+/** Concept-klantfactuur (out_invoice) met regels. Geen voorraadbeweging. */
+export async function createDraftInvoice({ partnerId, journalId, ref, date, lines }) {
+  return execute('account.move', 'create', [{
+    move_type: 'out_invoice',
+    partner_id: partnerId,
+    journal_id: journalId,
+    ref,
+    invoice_date: date,
+    invoice_line_ids: lines.map((l) => [0, 0, l]),
+  }]);
+}
+
+export async function readInvoice(id) {
+  const [rec] = await execute('account.move', 'read', [[id]], {
+    fields: ['amount_total', 'state', 'name', 'partner_id'],
+  });
+  return rec;
+}
+
+export async function postInvoice(id) {
+  return execute('account.move', 'action_post', [[id]]);
+}
+
+/** Aantal connector-facturen (ref begint met SHOP-), om de eerste 5 in concept te houden. */
+export async function countConnectorInvoices() {
+  return execute('account.move', 'search_count', [[
+    ['move_type', '=', 'out_invoice'],
+    ['ref', '=like', 'SHOP-%'],
+  ]]);
+}
+
+/**
+ * Betaling als MISC-boeking, zoals de maandboeking: cash debet 570000, kaart
+ * debet 400000 op de Shopify-partner; beide credit 400000 op het bedrijf.
+ */
+export async function createPaymentEntry({ ref, date, companyId, method, amount }) {
+  const receivable = await getAccountIdByCode('400000');
+  if (!receivable) throw new Error('Rekening 400000 niet gevonden.');
+  const debitLine = method === 'cash'
+    ? { account_id: await getAccountIdByCode('570000'), partner_id: false }
+    : { account_id: receivable, partner_id: 40 /* Shopify */ };
+  if (!debitLine.account_id) throw new Error('Rekening 570000 niet gevonden.');
+  return execute('account.move', 'create', [{
+    move_type: 'entry',
+    journal_id: 11, // Miscellaneous Operations (MISC)
+    date,
+    ref,
+    line_ids: [
+      [0, 0, { ...debitLine, debit: amount, credit: 0, name: ref }],
+      [0, 0, { account_id: receivable, partner_id: companyId, debit: 0, credit: amount, name: ref }],
+    ],
+  }]);
+}
+
+/** Afpunten: factuur-debet op het bedrijf tegen de betaal-credit op het bedrijf. */
+export async function reconcileWithInvoice(invoiceId, paymentId, companyId) {
+  const receivable = await getAccountIdByCode('400000');
+  const invLines = await execute('account.move.line', 'search', [[
+    ['move_id', '=', invoiceId], ['account_id', '=', receivable], ['partner_id', '=', companyId],
+  ]], { limit: 1 });
+  const payLines = await execute('account.move.line', 'search', [[
+    ['move_id', '=', paymentId], ['account_id', '=', receivable], ['partner_id', '=', companyId],
+  ]], { limit: 1 });
+  if (!invLines.length || !payLines.length) throw new Error('Regels om af te punten niet gevonden.');
+  await execute('account.move.line', 'reconcile', [[...invLines, ...payLines]]);
+  return true;
+}
+
+/**
+ * Verstuur een geboekte factuur (Peppol voor BE). NIET GETEST tegen Odoo 20:
+ * wordt alleen aangeroepen als INVOICE_SEND_ENABLED=true.
+ */
+export async function sendInvoice(invoiceId) {
+  return execute('account.move', 'action_send_and_print', [[invoiceId]]);
+}
