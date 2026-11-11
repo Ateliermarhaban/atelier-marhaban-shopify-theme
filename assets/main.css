@@ -11095,4 +11095,4 @@ model-viewer .container {
 
 /* Atelier Marhaban: tegels in het productoverzicht met witrand */
 .image-cont--tegel { background: #fff; }
-.image-cont--tegel .product-block__image img, .image-cont--tegel .product-block__image .img-ar { transform: scale(0.78); transform-origin: center; }
+.image-cont--tegel .product-block__image img, .image-cont--tegel .product-block__image .img-ar { transform: scale(0.88); transform-origin: center; }
