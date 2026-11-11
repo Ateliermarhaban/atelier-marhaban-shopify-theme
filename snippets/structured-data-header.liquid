@@ -69,6 +69,37 @@
   }
 </script>
 
+{%- if request.page_type == 'index' or page.handle == 'contact' or page.handle == 'over-ons' -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "HomeGoodsStore",
+      "@id": {{ shop.url | append: '/#showroom' | json }},
+      "name": "Atelier Marhaban",
+      "description": "Import van Marokkaans handwerk: handgemaakte zelliges en bejmats, handgedraaide potten en geurkaarsen. Showroom in Lievegem, bezoek op afspraak.",
+      "url": {{ shop.url | json }},
+      "telephone": "+3293670669",
+      "email": "info@atelier-marhaban.com",
+      "vatID": "BE0562882189",
+      "founder": { "@type": "Person", "name": "Thomas Dekeyzer" },
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Grote Baan 358 bus 0102",
+        "postalCode": "9930",
+        "addressLocality": "Lievegem",
+        "addressRegion": "Oost-Vlaanderen",
+        "addressCountry": "BE"
+      },
+      "areaServed": ["BE", "NL", "FR", "LU"],
+      "knowsAbout": ["zellige", "bejmat", "tadelakt", "Marokkaans aardewerk", "geurkaarsen"],
+      {%- if section.settings.logo %}
+      "image": {{ section.settings.logo | image_url: width: 600 | prepend: "https:" | json }},
+      {%- endif %}
+      "parentOrganization": { "@type": "Organization", "name": "TJM BV" }
+    }
+  </script>
+{%- endif -%}
+
 {%- if request.page_type == 'index' -%}
   {%- assign potential_action_target = shop.url | append: routes.search_url | append: "?q={search_term_string}" -%}
   <script type="application/ld+json">

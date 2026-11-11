@@ -36,6 +36,36 @@
   </div>
 </div>
 
+{%- liquid
+  assign faq_count = 0
+  for block in section.blocks
+    if block.type == 'question' and block.settings.title != blank and block.settings.answer != blank
+      assign faq_count = faq_count | plus: 1
+    endif
+  endfor
+-%}
+{%- if faq_count > 0 -%}
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {%- assign faq_i = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'question' and block.settings.title != blank and block.settings.answer != blank -%}
+          {%- if faq_i > 0 -%},{%- endif -%}
+          {%- assign faq_i = faq_i | plus: 1 -%}
+          {
+            "@type": "Question",
+            "name": {{ block.settings.title | strip_html | json }},
+            "acceptedAnswer": { "@type": "Answer", "text": {{ block.settings.answer | strip_html | strip | json }} }
+          }
+        {%- endif -%}
+      {%- endfor -%}
+    ]
+  }
+</script>
+{%- endif -%}
 
 {% schema %}
 {
