@@ -83,6 +83,8 @@
     {% endif %}
   {% endif %}
 
+  {%- if product.template_suffix == 'zelliges' or product.template_suffix == 'bejmats' -%}{%- assign hide_unit_price = true -%}{%- endif -%}
+  {%- unless hide_unit_price -%}
   {% if for_variant_picker or variant.unit_price_measurement %}
     <div class="unit-price"{% if variant.unit_price_measurement == nil %} hidden{% endif %}>
       <span class="visually-hidden">{{ 'products.product.price.unit_price' | t }}</span>
@@ -96,6 +98,7 @@
       </span>
     </div>
   {% endif %}
+  {%- endunless -%}
 
   {% if for_variant_picker %}
     <div class="price__no-variant" hidden>

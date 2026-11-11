@@ -134,6 +134,7 @@ if (!customElements.get('variant-picker')) {
       this.optionSelectors.forEach((selector, selectorIndex) => {
         const options = selector.querySelectorAll('.js-option:not([data-value=""])');
         let optionThatExists = false;
+        let optionThatIsAvailable = false;
         options.forEach((option) => {
           // Skip combined listings
           if (option.dataset.productUrl) return;
@@ -156,19 +157,33 @@ if (!customElements.get('variant-picker')) {
               }
               if (v.available) {
                 variantsAvailable = true;
+                if (!optionThatIsAvailable) {
+                  optionThatIsAvailable = option;
+                }
               }
             }
           });
           VariantPicker.updateOptionAvailability(option, variantsExist, variantsAvailable);
         });
-        if (this.dataset.availability === 'prune' && optionThatExists && selector.querySelector('.js-option.is-nonexistent:is(:checked, [aria-selected="true"])')) {
-          setTimeout(() => {
-            if (optionThatExists.closest('custom-select')) {
-              optionThatExists.closest('custom-select').selectOption(optionThatExists);
-            } else {
-              optionThatExists.click();
-            }
-          }, 0);
+        // Atelier Marhaban: in prune-modus springt een gekozen optie die niet (meer)
+        // op voorraad is naar de eerste beschikbare optie, zodat er nooit
+        // "uitverkocht" geselecteerd blijft staan. Is er geen enkele beschikbare
+        // optie, dan blijft het originele gedrag (enkel niet-bestaande opties).
+        if (this.dataset.availability === 'prune') {
+          const selectedIsNonexistent = selector.querySelector('.js-option.is-nonexistent:is(:checked, [aria-selected="true"])');
+          const selectedIsUnavailable = selector.querySelector('.js-option.is-unavailable:is(:checked, [aria-selected="true"])');
+          const target = (selectedIsUnavailable && optionThatIsAvailable)
+            || (selectedIsNonexistent && optionThatExists);
+
+          if (target) {
+            setTimeout(() => {
+              if (target.closest('custom-select')) {
+                target.closest('custom-select').selectOption(target);
+              } else {
+                target.click();
+              }
+            }, 0);
+          }
         }
       });
     }

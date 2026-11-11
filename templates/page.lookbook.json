@@ -1,3 +1,12 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
 {
   "sections": {
     "main": {
@@ -13,8 +22,7 @@
       "blocks": {
         "subheading_g3DDcX": {
           "type": "subheading",
-          "settings": {
-          }
+          "settings": {}
         },
         "heading_iNdVkn": {
           "type": "heading",
@@ -62,7 +70,7 @@
         "text_rrAEX9": {
           "type": "text",
           "settings": {
-            "text": "<p>See the unique additions we have to offer in our new collection<\/p>",
+            "text": "<p>See the unique additions we have to offer in our new collection</p>",
             "enlarge_text": true
           }
         }
@@ -196,7 +204,7 @@
             "hotspot_x_mobile": 47,
             "hotspot_y_mobile": 18,
             "heading": "Feature name",
-            "text": "<p>Share useful information about your product features.<\/p>",
+            "text": "<p>Share useful information about your product features.</p>",
             "icon": "",
             "icon_width": 32
           }
@@ -209,7 +217,7 @@
             "hotspot_x_mobile": 60,
             "hotspot_y_mobile": 23,
             "heading": "Feature name",
-            "text": "<p>Share useful information about your product features.<\/p>",
+            "text": "<p>Share useful information about your product features.</p>",
             "icon": "",
             "icon_width": 32
           }
@@ -222,7 +230,7 @@
             "hotspot_x_mobile": 73,
             "hotspot_y_mobile": 54,
             "heading": "Feature name",
-            "text": "<p>Share useful information about your product features.<\/p>",
+            "text": "<p>Share useful information about your product features.</p>",
             "icon": "",
             "icon_width": 32
           }
@@ -244,7 +252,7 @@
         "title": "Shoppable Image",
         "use_h1": false,
         "heading_max_width": 10,
-        "text": "<p>Create a Shop the Look section to assist with upselling or helping customers with purchasing complementary products.<\/p>",
+        "text": "<p>Create a Shop the Look section to assist with upselling or helping customers with purchasing complementary products.</p>",
         "button_1_label": "",
         "button_1_link": "",
         "button_1_style": "secondary",
@@ -342,9 +350,7 @@
       "type": "product-list",
       "settings": {
         "title": "",
-        "product_list": [
-
-        ],
+        "product_list": [],
         "show_vendor": false,
         "enable_carousel": true,
         "grid": 4,
@@ -370,9 +376,9 @@
       ],
       "settings": {
         "text_alignment": "center center",
-        "height_desktop": 600,
-        "height_mobile": 500,
-        "full_width": true,
+        "height_desktop": 420,
+        "height_mobile": 300,
+        "full_width": false,
         "overlay_style": "shadow"
       }
     }

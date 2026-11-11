@@ -1,0 +1,71 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "intro": {
+      "type": "image-with-text",
+      "blocks": {
+        "sub": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "Over Atelier Marhaban"
+          }
+        },
+        "head": {
+          "type": "heading",
+          "settings": {
+            "title": "Ik ben Thomas.",
+            "use_h1": true
+          }
+        },
+        "txt": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Ik breng zelliges, potten en geurkaarsen uit de ateliers van Marrakech naar België. Ik ga zelf ter plaatse en kies wat mee mag.</p>",
+            "enlarge_text": true
+          }
+        },
+        "btn": {
+          "type": "button",
+          "settings": {
+            "button_label": "Afspraak in de showroom",
+            "button_link": "https://outlook.office.com/bookwithme/user/413561ed535a4dc5ba9467874c679a66@atelier-marhaban.com?anonymous",
+            "button_style": "primary"
+          }
+        }
+      },
+      "block_order": [
+        "sub",
+        "head",
+        "txt",
+        "btn"
+      ],
+      "settings": {
+        "image": "shopify://shop_images/am-home-thomas-atelier-marrakech.jpg",
+        "image_width": 400,
+        "image_link": "",
+        "image_position": "left",
+        "text_alignment": "left",
+        "color_scheme": "default"
+      }
+    },
+    "main": {
+      "type": "main-page",
+      "settings": {
+        "show_page_title": false,
+        "full_width": false
+      }
+    }
+  },
+  "order": [
+    "intro",
+    "main"
+  ]
+}

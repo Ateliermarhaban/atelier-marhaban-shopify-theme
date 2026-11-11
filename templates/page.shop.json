@@ -1,0 +1,131 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "intro": {
+      "type": "rich-text",
+      "blocks": {
+        "h": {
+          "type": "heading",
+          "settings": {
+            "title": "Shop",
+            "use_h1": true
+          }
+        },
+        "t": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Alles is met de hand gemaakt in Marokko en geselecteerd door Atelier Marhaban. Werk je als architect, plaatser of winkel? Kijk dan bij <a href=\"/pages/professionals\">Professionals</a>.</p>",
+            "enlarge_text": false
+          }
+        }
+      },
+      "block_order": [
+        "h",
+        "t"
+      ],
+      "settings": {
+        "height": "small",
+        "text_alignment": "center",
+        "full_width": false,
+        "color_scheme": "1"
+      }
+    },
+    "tegels": {
+      "type": "multi-column",
+      "blocks": {
+        "tegel_kaarsen": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/am-home-tegel-kaarsen.jpg",
+            "title": "Geurkaarsen",
+            "text": "<p>Sojawas en een katoenen wiek, in handgeschilderde keramiek of handgeweven stof.</p>",
+            "button_label": "Bekijk de kaarsen",
+            "link": "shopify://collections/geurkaarsen-1"
+          }
+        },
+        "tegel_zelliges": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/am-home-tegel-zelliges.jpg",
+            "title": "Zelliges",
+            "text": "<p>Met de hand gevormd en geglazuurd. Prijs per m², ook voor buiten.</p>",
+            "button_label": "Bekijk de zelliges",
+            "link": "shopify://collections/zelliges"
+          }
+        },
+        "tegel_cadeaubon": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/cadeaubon-atelier-marhaban-voorkant.jpg",
+            "title": "Cadeaubon",
+            "text": "<p>Digitaal per mail of gedrukt per post. Ook te gebruiken in de showroom.</p>",
+            "button_label": "Kies een bedrag",
+            "link": "shopify://products/cadeaubon"
+          }
+        },
+        "tegel_bejmats": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/Bejmat_Naturel_Brut_02_kopie.jpg",
+            "title": "Bejmats",
+            "text": "<p>Vloertegels van 14 × 4,5 cm, dikker dan een zellige. Prijs per m².</p>",
+            "button_label": "Bekijk de bejmats",
+            "link": "shopify://collections/bejmats"
+          }
+        }
+      },
+      "block_order": [
+        "tegel_kaarsen",
+        "tegel_zelliges",
+        "tegel_bejmats",
+        "tegel_cadeaubon"
+      ],
+      "settings": {
+        "title": "",
+        "media_aspect_ratio": "0.8",
+        "media_width": 700,
+        "text_alignment": "center",
+        "button_style": "link",
+        "color_scheme": "default"
+      }
+    },
+    "geschenken": {
+      "type": "product-list",
+      "settings": {
+        "title": "Klaar om te geven",
+        "product_list": [
+          "el-fassia",
+          "sahara-pot",
+          "leopard",
+          "zebra",
+          "sahara-beehive",
+          "berberia",
+          "nazar",
+          "geo"
+        ],
+        "show_vendor": false,
+        "enable_carousel": true,
+        "grid": 4,
+        "color_scheme": "default",
+        "full_width": false
+      }
+    }
+  },
+  "order": [
+    "intro",
+    "tegels",
+    "geschenken"
+  ]
+}

@@ -11085,3 +11085,14 @@ model-viewer .container {
     flex-direction: row-reverse;
   }
 }
+/* Atelier Marhaban: productfoto past binnen de schermhoogte op laptop */
+@media (min-width: 768px) {
+  .media-gallery__inner { max-width: max(340px, calc(100vh - 320px)); margin-inline: auto; }
+}
+
+/* Atelier Marhaban: backorder-tekst zonder herhaalde productnaam */
+.backorder__product { display: none; }
+
+/* Atelier Marhaban: tegels in het productoverzicht met witrand */
+.image-cont--tegel { background: #f7f3ec; }
+.image-cont--tegel .product-block__image img, .image-cont--tegel .product-block__image .img-ar { transform: scale(0.88); transform-origin: center; }

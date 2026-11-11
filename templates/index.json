@@ -1,1 +1,401 @@
-{"sections":{"16359276425da8ce46":{"type":"slideshow","blocks":{"16359276425da8ce46-0":{"type":"image","settings":{"image":"shopify://shop_images/Marhaban-product-march-69149_kopie.jpg","mobile_image":"shopify://shop_images/Marhaban-product-march-69150_kopie.jpg","slide_link":"","subheading":"Niet ontworpen, gevonden.","title":"Authentiek Marokkaans vakmanschap","heading_max_width":15,"title_size":50,"title_size_mobile":20,"use_h1":false,"text":"<p>Voor winkels, architecten & interieurliefhebbers</p>","enlarge_text":false,"button_label_1":"Bekijk selectie","button_url_1":"shopify://collections","button_label_2":"","button_url_2":"","text_alignment":"center center"}},"16359276425da8ce46-1":{"type":"image","settings":{"image":"shopify://shop_images/P1654372B_kopie.jpg","mobile_image":"shopify://shop_images/P1654372B_kopie.jpg","slide_link":"","subheading":"Westerse kwaliteit, Marokkaanse hand.","title":"Geselecteerd voor karaktervolle plekken","heading_max_width":15,"title_size":50,"title_size_mobile":20,"use_h1":false,"text":"","enlarge_text":true,"button_label_1":"","button_url_1":"shopify://collections/zelliges","button_label_2":"","button_url_2":"","text_alignment":"bottom left"}}},"block_order":["16359276425da8ce46-0","16359276425da8ce46-1"],"settings":{"height":"full","height_desktop":600,"height_mobile":460,"full_width":true,"mobile_overlay_under":false,"overlay_style":"full image-overlay--bg-shadow","transition":"fade","navigation":"dots","autoplay":true,"autoplay_speed":5,"accessibility_info":""}},"16359278867b92de38":{"type":"image-with-text","blocks":{"64bcaa60-a78b-4408-9413-93788f2dd8b6":{"type":"subheading","settings":{"subheading":"Achter het merk."}},"8963d659-f502-4f87-9a3f-d5c8c7f4bda5":{"type":"heading","settings":{"title":"Ons Verhaal.","use_h1":false}},"ae36be52-0e56-4829-ac5d-f47fd671d46b":{"type":"text","settings":{"text":"<p>Ik ben Thomas. Ik importeer handcraft uit Marrakech en werk rechtstreeks met de makers.</p><p>Mohamed is een van hen. Ik zeg hem wat ik nodig heb, en ik zeg nee tegen wat niet goed genoeg is.</p><p>Dat is het verschil. Je krijgt het gevoel van Marokko, zonder de teleurstelling thuis.</p><p>Thomas</p>","enlarge_text":false}},"2e5b8e45-d07b-473e-9562-15a4d3d196d5":{"type":"button","disabled":true,"settings":{"button_label":"lees meer","button_link":"shopify://pages/over-ons","button_style":"secondary"}}},"block_order":["64bcaa60-a78b-4408-9413-93788f2dd8b6","8963d659-f502-4f87-9a3f-d5c8c7f4bda5","ae36be52-0e56-4829-ac5d-f47fd671d46b","2e5b8e45-d07b-473e-9562-15a4d3d196d5"],"settings":{"image":"shopify://shop_images/P1665383B_kopie.jpg","image_width":700,"image_link":"","image_position":"left","text_alignment":"left","color_scheme":"default"}},"rich_text_bybXBz":{"type":"rich-text","blocks":{"heading_mMkH6j":{"type":"heading","settings":{"title":"Architecten en designers.","use_h1":false}},"text_EaDqzd":{"type":"text","settings":{"text":"<p>Atelier Marhaban werkt samen met interieurarchitecten en ontwerpers. Je krijgt maatwerk en standaard uit dezelfde selectie, en je weet bij welke maker het ontstaat.</p><p>We denken mee over schaal, kleur en afwerking, en we leveren flexibel.</p>","enlarge_text":false}},"button_hbTakH":{"type":"button","settings":{"button_label":"Contacteer","button_link":"shopify://pages/contact","button_style":"secondary"}},"button_qgGNgL":{"type":"button","settings":{"button_label":"Lees meer","button_link":"shopify://pages/professionals","button_style":"secondary"}}},"block_order":["heading_mMkH6j","text_EaDqzd","button_hbTakH","button_qgGNgL"],"name":"Rich text","settings":{"height":"medium","text_alignment":"center","full_width":false,"color_scheme":"2"}},"product_list_QVxF8y":{"type":"product-list","name":"Product list","settings":{"title":"Onze favorieten","product_list":["idris","laila-tadelakt","hana-tadelakt","bejmat-naturel","rasha-geemailleerd"],"show_vendor":false,"enable_carousel":true,"grid":5,"color_scheme":"default","full_width":true}},"newsletter_VWaXXM":{"type":"newsletter","name":"Newsletter","settings":{"title":"Word als eerste geïnspireerd!","subheading":"<p>Geen spam, beloofd!</p>","color_scheme":"default"}},"homepage_hero_YaMq9w":{"type":"homepage-hero","disabled":true,"name":"Hero — Marhaban","settings":{"heading":"Niet ontworpen, gevonden.","use_h1":true,"heading_size_mobile":48,"heading_size_desktop":56,"tagline":"Westerse kwaliteit, Marokkaanse hand","text":"<p>Atelier Marhaban brengt authentieke ambachtskwaliteit uit Marokko naar jouw interieur. We filteren. We zeggen nee tegen wat niet goed genoeg is.</p>","button_label":"Bekijk selectie","button_link":"","button_style":"primary","heading_color":"#5e7361","tagline_color":"#ba6a55","text_color":"#2e2e2e","color_scheme":"default","overlay_opacity":30,"height_mobile":450,"height_desktop":650}},"homepage_featured_sections_QgwCUF":{"type":"homepage-featured-sections","blocks":{"column_CebWDn":{"type":"column","settings":{"label":"Veeleisende klant","text":"<p>Je bent architect, ontwerper, of particulier. Je wil Marokko voelen, maar je bent voorzichtig.</p>","is_featured":false,"button_label":"","button_link":""}},"column_Bawjhm":{"type":"column","settings":{"label":"Atelier Marhaban","text":"<p>We spreken beide talen. We filteren. We zeggen ja tegen wat past, nee tegen wat niet goed genoeg is.</p>","is_featured":true,"button_label":"","button_link":""}},"column_C4mJVH":{"type":"column","settings":{"label":"Ambachtsman","text":"<p>Mohamed in Marokko. Hij maakt potten op intuïtie. Dat interesseert hem niet — maar het interesseert ons wel.</p>","is_featured":false,"button_label":"","button_link":""}}},"block_order":["column_CebWDn","column_Bawjhm","column_C4mJVH"],"disabled":true,"name":"Featured sections","settings":{"title":"De brug","title_color":"#5e7361","label_color":"#ba6a55","text_color":"#2e2e2e","featured_bg_color":"#5e7361","featured_text_color":"#dec8b8","featured_label_color":"#dec8b8","color_scheme":"default","text_alignment":"center"}}},"order":["16359276425da8ce46","16359278867b92de38","rich_text_bybXBz","product_list_QVxF8y","newsletter_VWaXXM","homepage_hero_YaMq9w","homepage_featured_sections_QgwCUF"]}
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "hero": {
+      "type": "slideshow",
+      "blocks": {
+        "slide_hand": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/am-home-hero-zellige-hand.jpg",
+            "mobile_image": "shopify://shop_images/am-home-hero-zellige-hand.jpg",
+            "slide_link": "",
+            "subheading": "Handgemaakt in Marokko",
+            "title": "Westerse kwaliteit, Marokkaanse hand.",
+            "heading_max_width": 16,
+            "title_size": 54,
+            "title_size_mobile": 30,
+            "use_h1": true,
+            "text": "<p>Zelliges, potten en geurkaarsen uit de ateliers van Marrakech. Ik ga er zelf naartoe en kies elk stuk.</p>",
+            "enlarge_text": false,
+            "button_label_1": "Naar de shop",
+            "button_url_1": "shopify://pages/shop",
+            "button_label_2": "Voor professionals",
+            "button_url_2": "shopify://pages/professionals",
+            "text_alignment": "bottom left"
+          }
+        },
+        "slide_beitel": {
+          "type": "image",
+          "settings": {
+            "image": "shopify://shop_images/P1654372B_kopie.jpg",
+            "mobile_image": "shopify://shop_images/P1654372B_kopie.jpg",
+            "slide_link": "",
+            "subheading": "Zelliges",
+            "title": "Getest op vorst en zwembadchloor.",
+            "heading_max_width": 16,
+            "title_size": 54,
+            "title_size_mobile": 30,
+            "use_h1": false,
+            "text": "<p>Elke tegel wordt met de hand gevormd, geglazuurd en op maat gekapt.</p>",
+            "enlarge_text": false,
+            "button_label_1": "Bekijk zelliges",
+            "button_url_1": "shopify://collections/zelliges",
+            "button_label_2": "Stalen aanvragen",
+            "button_url_2": "shopify://pages/professionals",
+            "text_alignment": "bottom left"
+          }
+        }
+      },
+      "block_order": [
+        "slide_hand",
+        "slide_beitel"
+      ],
+      "settings": {
+        "height": "fixed",
+        "height_desktop": 640,
+        "height_mobile": 560,
+        "full_width": true,
+        "mobile_overlay_under": false,
+        "overlay_style": "full image-overlay--bg-shadow",
+        "transition": "fade",
+        "navigation": "dots",
+        "autoplay": true,
+        "autoplay_speed": 7,
+        "accessibility_info": ""
+      }
+    },
+    "shop_tegels": {
+      "type": "multi-column",
+      "blocks": {
+        "tegel_kaarsen": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/am-home-tegel-kaarsen.jpg",
+            "title": "Geurkaarsen",
+            "text": "<p>Sojawas en een katoenen wiek, in handgeschilderde keramiek of handgeweven stof.</p>",
+            "button_label": "Bekijk de kaarsen",
+            "link": "shopify://collections/geurkaarsen-1"
+          }
+        },
+        "tegel_zelliges": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/am-home-tegel-zelliges.jpg",
+            "title": "Zelliges",
+            "text": "<p>Met de hand gevormd en geglazuurd. Prijs per m², ook voor buiten.</p>",
+            "button_label": "Bekijk de zelliges",
+            "link": "shopify://collections/zelliges"
+          }
+        },
+        "tegel_cadeaubon": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/cadeaubon-atelier-marhaban-voorkant.jpg",
+            "title": "Cadeaubon",
+            "text": "<p>Digitaal per mail of gedrukt per post. Ook te gebruiken in de showroom.</p>",
+            "button_label": "Kies een bedrag",
+            "link": "shopify://products/cadeaubon"
+          }
+        },
+        "tegel_bejmats": {
+          "type": "text_block",
+          "settings": {
+            "enable_media": true,
+            "image": "shopify://shop_images/Bejmat_Naturel_Brut_02_kopie.jpg",
+            "title": "Bejmats",
+            "text": "<p>Vloertegels van 14 × 4,5 cm, dikker dan een zellige. Prijs per m².</p>",
+            "button_label": "Bekijk de bejmats",
+            "link": "shopify://collections/bejmats"
+          }
+        }
+      },
+      "block_order": [
+        "tegel_kaarsen",
+        "tegel_zelliges",
+        "tegel_bejmats",
+        "tegel_cadeaubon"
+      ],
+      "settings": {
+        "title": "Shop",
+        "media_aspect_ratio": "0.8",
+        "media_width": 700,
+        "text_alignment": "center",
+        "button_style": "link",
+        "color_scheme": "default"
+      }
+    },
+    "eindejaar": {
+      "type": "image-with-text-overlay",
+      "blocks": {
+        "ej_sub": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "Eindejaar"
+          }
+        },
+        "ej_head": {
+          "type": "heading",
+          "settings": {
+            "title": "Iets om te geven.",
+            "heading_max_width": 14,
+            "title_size": 48,
+            "title_size_mobile": 28,
+            "use_h1": false
+          }
+        },
+        "ej_text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Geurkaarsen in handgeschilderde keramiek, kleine potten en cadeaubonnen.</p>",
+            "enlarge_text": false
+          }
+        },
+        "ej_btn1": {
+          "type": "button",
+          "settings": {
+            "button_label": "Bekijk de kaarsen",
+            "button_link": "shopify://collections/geurkaarsen-1",
+            "button_style": "primary"
+          }
+        },
+        "ej_btn2": {
+          "type": "button",
+          "settings": {
+            "button_label": "Cadeaubon",
+            "button_link": "shopify://products/cadeaubon",
+            "button_style": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "ej_sub",
+        "ej_head",
+        "ej_text",
+        "ej_btn1",
+        "ej_btn2"
+      ],
+      "settings": {
+        "image": "shopify://shop_images/am-home-eindejaar-kaarsen.jpg",
+        "mobile_image": "shopify://shop_images/am-home-eindejaar-kaarsen.jpg",
+        "height": "adapt",
+        "height_desktop": 600,
+        "height_mobile": 500,
+        "image_link": "",
+        "full_width": true,
+        "text_alignment": "center left",
+        "mobile_overlay_under": true,
+        "overlay_style": "box"
+      }
+    },
+    "geschenken": {
+      "type": "product-list",
+      "settings": {
+        "title": "Klaar om te geven",
+        "product_list": [
+          "el-fassia",
+          "sahara-pot",
+          "leopard",
+          "zebra",
+          "sahara-beehive",
+          "berberia",
+          "nazar",
+          "geo"
+        ],
+        "show_vendor": false,
+        "enable_carousel": true,
+        "grid": 4,
+        "color_scheme": "default",
+        "full_width": false
+      }
+    },
+    "professionals": {
+      "type": "image-with-text",
+      "blocks": {
+        "pro_sub": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "Voor professionals"
+          }
+        },
+        "pro_head": {
+          "type": "heading",
+          "settings": {
+            "title": "Architecten, winkels en tegelhandels.",
+            "use_h1": false
+          }
+        },
+        "pro_text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>In de pro-webshop bestel je met je eigen voorwaarden: nettoprijzen excl. btw en het volledige gamma, ook de grote potten.</p><p>Zelliges bestel je als stalen, los of gekleefd op een staalbord. Voor een project of een maatkleur maak ik een offerte op maat.</p><p>Atelier Marhaban verzorgt import, transport en douane. De stock ligt in Lievegem.</p>",
+            "enlarge_text": false
+          }
+        },
+        "pro_btn1": {
+          "type": "button",
+          "settings": {
+            "button_label": "Pro-account aanvragen",
+            "button_link": "shopify://pages/professionals",
+            "button_style": "primary"
+          }
+        },
+        "pro_btn2": {
+          "type": "button",
+          "settings": {
+            "button_label": "Inloggen",
+            "button_link": "https://pro.atelier-marhaban.com/web/login",
+            "button_style": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "pro_sub",
+        "pro_head",
+        "pro_text",
+        "pro_btn1",
+        "pro_btn2"
+      ],
+      "settings": {
+        "image": "shopify://shop_images/am-home-atelier-lievegem.jpg",
+        "image_width": 600,
+        "image_link": "",
+        "image_position": "left",
+        "text_alignment": "left",
+        "color_scheme": "2"
+      }
+    },
+    "zelliges_buiten": {
+      "type": "image-with-text",
+      "blocks": {
+        "zb_sub": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "Zelliges van Mohcin"
+          }
+        },
+        "zb_head": {
+          "type": "heading",
+          "settings": {
+            "title": "Gemaakt voor buiten.",
+            "use_h1": false
+          }
+        },
+        "zb_text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Gewone zelliges bevatten kleine stukjes kalk in de klei. Die houden vocht vast, en bij vorst springt het glazuur. Mohcin werkt met klei uit Fez en een proces zonder dat probleem.</p><p>TCKI testte de tegels: geen vorstschade, bestand tegen thermoshock en tegen zwembadchloor (klasse A). Ze nemen wel vocht op. Achter de tegels hoort dus een waterdichte laag.</p>",
+            "enlarge_text": false
+          }
+        },
+        "zb_btn": {
+          "type": "button",
+          "settings": {
+            "button_label": "Bekijk de zelliges",
+            "button_link": "shopify://collections/zelliges",
+            "button_style": "secondary"
+          }
+        }
+      },
+      "block_order": [
+        "zb_sub",
+        "zb_head",
+        "zb_text",
+        "zb_btn"
+      ],
+      "settings": {
+        "image": "shopify://shop_images/am-home-zelliges-zwembad.jpg",
+        "image_width": 600,
+        "image_link": "",
+        "image_position": "right",
+        "text_alignment": "left",
+        "color_scheme": "default"
+      }
+    },
+    "over_thomas": {
+      "type": "image-with-text",
+      "blocks": {
+        "ot_sub": {
+          "type": "subheading",
+          "settings": {
+            "subheading": "Over Atelier Marhaban"
+          }
+        },
+        "ot_head": {
+          "type": "heading",
+          "settings": {
+            "title": "Ik ben Thomas.",
+            "use_h1": false
+          }
+        },
+        "ot_text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Ik zocht zelliges voor een buitenzwembad in Gent en vond er geen die ons klimaat aankon. Zo kwam ik bij Mohcin in Marrakech terecht.</p><p>Vandaag ga ik zelf naar de ateliers, bekijk ik het werk en zeg ik nee als het niet goed genoeg is. Wat binnenkomt, ligt in Lievegem. Je kan het er komen bekijken, op afspraak.</p>",
+            "enlarge_text": false
+          }
+        },
+        "ot_btn1": {
+          "type": "button",
+          "settings": {
+            "button_label": "Afspraak in de showroom",
+            "button_link": "https://outlook.office.com/bookwithme/user/413561ed535a4dc5ba9467874c679a66@atelier-marhaban.com?anonymous",
+            "button_style": "primary"
+          }
+        },
+        "ot_btn2": {
+          "type": "button",
+          "settings": {
+            "button_label": "Mijn verhaal",
+            "button_link": "shopify://pages/over-ons",
+            "button_style": "link"
+          }
+        }
+      },
+      "block_order": [
+        "ot_sub",
+        "ot_head",
+        "ot_text",
+        "ot_btn1",
+        "ot_btn2"
+      ],
+      "settings": {
+        "image": "shopify://shop_images/am-home-thomas-atelier-marrakech.jpg",
+        "image_width": 500,
+        "image_link": "",
+        "image_position": "left",
+        "text_alignment": "left",
+        "color_scheme": "default"
+      }
+    },
+    "nieuwsbrief": {
+      "type": "newsletter",
+      "settings": {
+        "title": "Nieuw in het atelier",
+        "subheading": "<p>Nieuwe kleuren en potten, en wat er in Marrakech gemaakt wordt.</p>",
+        "color_scheme": "1"
+      }
+    }
+  },
+  "order": [
+    "hero",
+    "shop_tegels",
+    "eindejaar",
+    "geschenken",
+    "professionals",
+    "zelliges_buiten",
+    "over_thomas",
+    "nieuwsbrief"
+  ]
+}
