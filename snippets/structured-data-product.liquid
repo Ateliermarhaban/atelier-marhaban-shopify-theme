@@ -10,7 +10,7 @@
   - stalen: verzending inbegrepen
   - rest: BE € 9,95 (gratis vanaf € 150), NL/FR/LU € 14,95 (gratis vanaf € 250)
   Geen gtin: de barcodes zijn interne EAN-13 (2001...), geen geldige GTIN.
-  Retourbeleid nog niet opgenomen: wacht op beslissing (projecthandleiding).
+  Retourbeleid (12/11/2026): 14 dagen, terugzending op kosten van de klant, per post of in de showroom.
 
   Usage:
   {% render 'structured-data-product', product: product %}
@@ -37,6 +37,16 @@
 -%}
 
 {%- capture am_offer_extra -%}
+  "hasMerchantReturnPolicy": {
+    "@type": "MerchantReturnPolicy",
+    "applicableCountry": ["BE", "NL", "FR", "LU"],
+    "returnPolicyCategory": "https://schema.org/MerchantReturnFiniteReturnWindow",
+    "merchantReturnDays": 14,
+    "returnMethod": ["https://schema.org/ReturnByMail", "https://schema.org/ReturnInStore"],
+    "returnFees": "https://schema.org/ReturnFeesCustomerResponsibility",
+    "itemCondition": "https://schema.org/NewCondition",
+    "merchantReturnLink": {{ request.origin | append: '/policies/refund-policy' | json }}
+  },
   "shippingDetails": [
     {%- for country in am_countries -%}
       {%- liquid
