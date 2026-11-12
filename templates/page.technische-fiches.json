@@ -1,0 +1,53 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "fiches": {
+      "type": "am-technische-fiches",
+      "blocks": {
+        "fiche_nl": {
+          "type": "file",
+          "settings": {
+            "title": "Zelliges en bejmats",
+            "subtitle": "Nederlands · pdf · versie oktober 2026",
+            "url": "https://cdn.shopify.com/s/files/1/0876/0003/8213/files/technische-fiche-zelliges-bejmats-atelier-marhaban-nl.pdf",
+            "button_label": "Downloaden"
+          }
+        },
+        "fiche_fr": {
+          "type": "file",
+          "settings": {
+            "title": "Zelliges et bejmats",
+            "subtitle": "Français · pdf · version octobre 2026",
+            "url": "https://cdn.shopify.com/s/files/1/0876/0003/8213/files/fiche-technique-zelliges-bejmats-atelier-marhaban-fr.pdf",
+            "button_label": "Télécharger"
+          }
+        }
+      },
+      "block_order": [
+        "fiche_nl",
+        "fiche_fr"
+      ],
+      "settings": {
+        "title": "Technische fiches",
+        "intro": "<p>Formaten, kleuren, de testresultaten van TCKI, plaatsing en onderhoud van de zelliges en bejmats. Vul je gegevens in en je downloadt de fiches meteen.</p>",
+        "button_label": "Fiches downloaden",
+        "consent_text": "<p>Je krijgt af en toe nieuws van Atelier Marhaban. Uitschrijven kan altijd, onderaan elke mail.</p>",
+        "base_tags": "Download technische fiche, newsletter",
+        "success_title": "Je fiches staan klaar.",
+        "success_text": "<p>Drie bladzijden: gamma, testresultaten van TCKI, plaatsing en onderhoud.</p>",
+        "after_text": "<p>De fiches voor de potten volgen. Een vraag over een project? Bel +32 9 367 06 69 of mail <a href=\"mailto:info@atelier-marhaban.com\">info@atelier-marhaban.com</a>. Stalen bestel je op de <a href=\"/pages/professionals\">Professionals-pagina</a>.</p>"
+      }
+    }
+  },
+  "order": [
+    "fiches"
+  ]
+}
