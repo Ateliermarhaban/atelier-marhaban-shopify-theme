@@ -164,7 +164,7 @@
           "type": "button",
           "settings": {
             "button_label": "Technische fiches downloaden",
-            "button_link": "/pages/technische-fiches",
+            "button_link": "shopify://pages/technische-fiches",
             "button_style": "primary"
           }
         }
