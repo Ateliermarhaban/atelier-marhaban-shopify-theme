@@ -1,0 +1,148 @@
+{%- comment -%}
+  Atelier Marhaban: technische fiches downloaden na het invullen van contactgegevens.
+  Het formulier is het klantformulier van Shopify (form 'customer'): de bezoeker wordt klant in Shopify,
+  ingeschreven voor e-mailmarketing, met tags en een notitie. De Voorraadsync zet hem in Odoo.
+{%- endcomment -%}
+<div class="container fully-spaced-row--medium am-fiches" {%- render 'animation-attrs', attrs: 'data-cc-animate' -%}>
+  <div class="reading-width account-form">
+    {% form 'customer', id: 'am_fiches_form', class: 'am-fiches__form' %}
+      {% if form.posted_successfully? %}
+        <div class="lightish-spaced-row align-center">
+          {% if section.settings.success_title != blank %}<h2>{{ section.settings.success_title | escape }}</h2>{% endif %}
+          {% if section.settings.success_text != blank %}<div class="rte">{{ section.settings.success_text }}</div>{% endif %}
+        </div>
+        <div class="am-fiches__files">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'file' and block.settings.url != blank -%}
+              <a class="am-fiches__file" href="{{ block.settings.url }}" target="_blank" rel="noopener" download {{ block.shopify_attributes }}>
+                <span class="am-fiches__file-title">{{ block.settings.title | escape }}</span>
+                <span class="am-fiches__file-sub">{{ block.settings.subtitle | escape }}</span>
+                <span class="btn">{{ block.settings.button_label | escape }}</span>
+              </a>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+        {% if section.settings.after_text != blank %}<div class="rte lightly-spaced-row align-center">{{ section.settings.after_text }}</div>{% endif %}
+      {% else %}
+        <div class="lightish-spaced-row align-center">
+          {% if section.settings.title != blank %}<h1 class="h2">{{ section.settings.title | escape }}</h1>{% endif %}
+          {% if section.settings.intro != blank %}<div class="rte">{{ section.settings.intro }}</div>{% endif %}
+        </div>
+
+        {%- render 'form-errors', form: form -%}
+
+        <input type="hidden" name="contact[tags]" value="{{ section.settings.base_tags | escape }}" data-am-tags>
+        <input type="hidden" name="contact[note]" value="" data-am-note>
+
+        <div class="flexible-layout flexible-layout--form">
+          <div class="column column--half">
+            <label for="am_aanspreking">Aanspreking *</label>
+            <select id="am_aanspreking" required data-am-field="Aanspreking">
+              <option value="">Kies</option>
+              <option value="Mevrouw">Mevrouw</option>
+              <option value="Meneer">Meneer</option>
+            </select>
+          </div>
+          <div class="column column--half">
+            <label for="am_beroep">Beroep *</label>
+            <select id="am_beroep" required data-am-field="Beroep">
+              <option value="">Kies</option>
+              <option value="Architect of interieurontwerper" data-tag="Interieurarchitect">Architect of interieurontwerper</option>
+              <option value="Tegelhandel of plaatser" data-tag="Tegelbedrijf">Tegelhandel of plaatser</option>
+              <option value="Winkel of conceptstore" data-tag="Detailzaak">Winkel of conceptstore</option>
+              <option value="Hotel, horeca of project" data-tag="Project">Hotel, horeca of project</option>
+              <option value="Particulier" data-tag="Particulier">Particulier</option>
+              <option value="Andere">Andere</option>
+            </select>
+          </div>
+          <div class="column column--half">
+            <label for="am_first_name">Voornaam *</label>
+            <input type="text" id="am_first_name" name="contact[first_name]" autocomplete="given-name" required>
+          </div>
+          <div class="column column--half">
+            <label for="am_last_name">Familienaam *</label>
+            <input type="text" id="am_last_name" name="contact[last_name]" autocomplete="family-name" required>
+          </div>
+          <div class="column column--full">
+            <label for="am_bedrijf">Bedrijf</label>
+            <input type="text" id="am_bedrijf" autocomplete="organization" data-am-field="Bedrijf">
+          </div>
+          <div class="column column--half">
+            <label for="am_email">E-mail *</label>
+            <input type="email" id="am_email" name="contact[email]" autocomplete="email" spellcheck="false" autocapitalize="off" required>
+          </div>
+          <div class="column column--half">
+            <label for="am_phone">Telefoon</label>
+            <input type="tel" id="am_phone" autocomplete="tel" data-am-field="Telefoon">
+          </div>
+        </div>
+
+        <div class="lightly-spaced-row align-center">
+          <button class="btn" type="submit">{{ section.settings.button_label | escape }}</button>
+        </div>
+        {% if section.settings.consent_text != blank %}<div class="rte am-fiches__consent align-center">{{ section.settings.consent_text }}</div>{% endif %}
+      {% endif %}
+    {% endform %}
+  </div>
+</div>
+
+<script>
+  (function () {
+    var form = document.getElementById('am_fiches_form');
+    if (!form) return;
+    form.addEventListener('submit', function () {
+      var tags = form.querySelector('[data-am-tags]');
+      var note = form.querySelector('[data-am-note]');
+      var list = (tags.value || '').split(',').map(function (t) { return t.trim(); }).filter(Boolean);
+      var beroep = form.querySelector('#am_beroep');
+      var opt = beroep && beroep.options[beroep.selectedIndex];
+      if (opt && opt.getAttribute('data-tag')) list.push(opt.getAttribute('data-tag'));
+      if (opt && opt.value && opt.value !== 'Particulier') list.push('B2B', 'Mailing B2B', 'Prospect');
+      tags.value = list.join(', ');
+      var lines = ['Technische fiche gedownload via de website'];
+      form.querySelectorAll('[data-am-field]').forEach(function (el) {
+        if (el.value) lines.push(el.getAttribute('data-am-field') + ': ' + el.value);
+      });
+      note.value = lines.join('\n');
+    });
+  })();
+</script>
+
+<style>
+  .am-fiches__files { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 30px; }
+  .am-fiches__file { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 24px; background: #f7f3ec; border: 1px solid #d9d2c5; text-decoration: none; color: inherit; }
+  .am-fiches__file-title { font-size: 1.15em; }
+  .am-fiches__file-sub { font-size: 0.85em; opacity: 0.7; margin-bottom: 12px; }
+  .am-fiches__consent { font-size: 0.85em; opacity: 0.75; margin-top: 16px; }
+  .am-fiches select { width: 100%; }
+</style>
+
+{% schema %}
+{
+  "name": "Technische fiches",
+  "class": "section-am-technische-fiches",
+  "settings": [
+    { "type": "text", "id": "title", "label": "Titel", "default": "Technische fiches" },
+    { "type": "richtext", "id": "intro", "label": "Inleiding" },
+    { "type": "text", "id": "button_label", "label": "Knop formulier", "default": "Fiches downloaden" },
+    { "type": "richtext", "id": "consent_text", "label": "Tekst onder het formulier" },
+    { "type": "text", "id": "base_tags", "label": "Tags voor elke aanvrager", "default": "Download technische fiche, newsletter" },
+    { "type": "text", "id": "success_title", "label": "Titel na versturen", "default": "Je fiches staan klaar." },
+    { "type": "richtext", "id": "success_text", "label": "Tekst na versturen" },
+    { "type": "richtext", "id": "after_text", "label": "Tekst onder de downloads" }
+  ],
+  "blocks": [
+    {
+      "type": "file",
+      "name": "Fiche",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titel", "default": "Zelliges en bejmats" },
+        { "type": "text", "id": "subtitle", "label": "Onderschrift", "default": "Nederlands · pdf" },
+        { "type": "text", "id": "url", "label": "Link naar het bestand (Shopify › Bestanden)" },
+        { "type": "text", "id": "button_label", "label": "Knop", "default": "Downloaden" }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Technische fiches" } ]
+}
+{% endschema %}
