@@ -164,7 +164,7 @@
           "type": "button",
           "settings": {
             "button_label": "Technische fiches downloaden",
-            "button_link": "https://pro.atelier-marhaban.com/technische-fiches",
+            "button_link": "/pages/technische-fiches",
             "button_style": "primary"
           }
         }
