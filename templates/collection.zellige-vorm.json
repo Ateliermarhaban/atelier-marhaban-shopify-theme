@@ -65,7 +65,7 @@
         "txt": {
           "type": "text",
           "settings": {
-            "text": "<p>Gewone Marokkaanse zelliges bevatten kleine kalkbrokjes in de klei. Die nemen vocht op, en bij vorst springt het glazuur eraf.</p><p>Mohcin maakt de zelliges van Atelier Marhaban in Marrakech, met klei uit Fez en een aangepast productieproces zonder dat probleem. TCKI, een geaccrediteerd keramieklab in Nederland, testte ze op vorst (EN-ISO 10545-12): geen schade.</p>",
+            "text": "<p>Gewone Marokkaanse zelliges bevatten kleine kalkbrokjes in de klei. Die nemen vocht op, en bij vorst springt het glazuur eraf.</p><p>Mohcin maakt de zelliges van Atelier Marhaban in Marrakech, met klei uit Fez en een aangepast productieproces zonder dat probleem. TCKI, een geaccrediteerd keramieklab in Nederland, testte de geglazuurde zelliges op vorst (EN-ISO 10545-12): geen schade. Naturel brut is niet op vorst getest.</p><p>Op een horizontaal vlak buiten, zoals een muurafdekking, een vensterbank of de rand van een zwembad, raadt Mohcin aan de tegels in de winter af te dekken: tegen sneeuw kunnen ze niet.</p>",
             "enlarge_text": false
           }
         }
@@ -92,14 +92,14 @@
           "type": "question",
           "settings": {
             "title": "Kan ik zelliges buiten gebruiken?",
-            "answer": "<p>Ja. TCKI testte ze op vorst (EN-ISO 10545-12) en op thermoshock (EN-ISO 10545-9): geen schade. De tegels nemen wel vocht op, zo'n 18 tot 20 massa%. Ze zijn dus niet waterdicht.</p>"
+            "answer": "<p>De geglazuurde wel. TCKI testte ze op vorst (EN-ISO 10545-12) en op thermoshock (EN-ISO 10545-9): geen schade. De tegels nemen wel vocht op, zo'n 18 tot 20 massa%. Ze zijn dus niet waterdicht.</p><p>Op een horizontaal vlak buiten, zoals een muurafdekking, een vensterbank of de rand van een zwembad, raadt Mohcin aan de tegels in de winter af te dekken: tegen sneeuw kunnen ze niet.</p><p>Naturel brut is niet op vorst getest. Voor buiten kies je een geglazuurde zellige.</p>"
           }
         },
         "vraag_2": {
           "type": "question",
           "settings": {
             "title": "Zijn ze geschikt voor een zwembad?",
-            "answer": "<p>Ze zijn getest op bestandheid tegen zwembadchloor (EN-ISO 10545-13, klasse A). Omdat zelliges vocht opnemen, is een waterdichte laag achter de tegels nodig. Laat de opbouw bepalen door je architect of plaatser.</p>"
+            "answer": "<p>De geglazuurde zelliges zijn getest op bestandheid tegen zwembadchloor (EN-ISO 10545-13, klasse A). Omdat zelliges vocht opnemen, is een waterdichte laag achter de tegels nodig. Laat de opbouw bepalen door je architect of plaatser.</p><p>Ligt er zellige op de horizontale rand van een buitenzwembad, dek die dan in de winter af tegen sneeuw.</p>"
           }
         },
         "vraag_3": {

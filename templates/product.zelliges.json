@@ -82,7 +82,7 @@
           "settings": {
             "title": "Getest door TCKI",
             "icon": "award",
-            "custom_liquid": "{%- unless product.title contains 'Naturel' -%}<p>TCKI is een geaccrediteerd keramieklab in Nederland. Resultaten voor de geglazuurde zelliges:</p><ul><li>Vorst (EN-ISO 10545-12): geen schade</li><li>Thermoshock (EN-ISO 10545-9): geen schade na 10 cycli</li><li>Zwembadchloor en huishoudchemicaliën (EN-ISO 10545-13): klasse A</li><li>Wateropname: hoog, ongeveer 18 à 20%</li><li>Slijtweerstand glazuur (EN-ISO 10545-7): klasse 0, laag</li></ul>{%- else -%}<p>De testen gelden voor de geglazuurde zelliges, niet voor naturel brut.</p>{%- endunless -%}",
+            "custom_liquid": "{%- unless product.title contains 'Naturel' -%}<p>TCKI is een geaccrediteerd keramieklab in Nederland. Resultaten voor de geglazuurde zelliges:</p><ul><li>Vorst (EN-ISO 10545-12): geen schade</li><li>Thermoshock (EN-ISO 10545-9): geen schade na 10 cycli</li><li>Zwembadchloor en huishoudchemicaliën (EN-ISO 10545-13): klasse A</li><li>Wateropname: hoog, ongeveer 18 à 20%</li><li>Slijtweerstand glazuur (EN-ISO 10545-7): klasse 0, laag</li></ul>{%- else -%}<p>De testen van TCKI op vorst en chemische bestandheid gelden voor de geglazuurde zelliges. Naturel brut is daarop niet getest.</p>{%- endunless -%}",
             "open": false,
             "show_in_quickbuy": false,
             "content": ""
@@ -107,7 +107,7 @@
             "open": false,
             "show_in_quickbuy": false,
             "content": "",
-            "custom_liquid": "{%- assign naturel = false -%}{%- if product.title contains 'Naturel' -%}{%- assign naturel = true -%}{%- endif -%}{%- if naturel -%}<p>Zonder glazuur neemt de klei meer vocht en vuil op dan een geglazuurde tegel. Impregneren na het plaatsen is aan te raden.</p>{%- else -%}<p>Op wanden binnen en buiten, in keukens, badkamers en als zwembadbekleding. Bij een zwembad blijft een waterdichte laag achter de tegels nodig.</p><p>Niet voor vloeren met veel loopverkeer: het glazuur heeft een lage slijtweerstand.</p>{%- endif -%}<p>Het plaatsingsadvies hoort bij je architect of plaatser.</p>"
+            "custom_liquid": "{%- assign naturel = false -%}{%- if product.title contains 'Naturel' -%}{%- assign naturel = true -%}{%- endif -%}{%- if naturel -%}<p>Zonder glazuur neemt de klei meer vocht en vuil op dan een geglazuurde tegel. Impregneren na het plaatsen is aan te raden.</p><p>Naturel brut is niet op vorst getest. Voor buiten kies je een geglazuurde zellige.</p>{%- else -%}<p>Op wanden binnen en buiten, in keukens, badkamers en als zwembadbekleding. Bij een zwembad blijft een waterdichte laag achter de tegels nodig.</p><p>Op een horizontaal vlak buiten, zoals een muurafdekking, een vensterbank of de rand van een zwembad, raadt Mohcin aan de tegels in de winter af te dekken: tegen sneeuw kunnen ze niet.</p><p>Niet voor vloeren met veel loopverkeer: het glazuur heeft een lage slijtweerstand.</p>{%- endif -%}<p>Het plaatsingsadvies hoort bij je architect of plaatser.</p>"
           }
         },
         "accordion_bestellen": {
