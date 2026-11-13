@@ -109,25 +109,33 @@
   "image": {{ product.featured_media | image_url: width: 1600 | prepend: 'https:' | json }},
   {%- endif %}
   {%- unless product.has_only_default_variant %}
-  "variesBy": [
-    {%- for option in product.options_with_values -%}
-      {%- liquid
-        assign oname = option.name | downcase
-        if oname contains 'kleur' or oname contains 'color' or oname contains 'colour'
-          assign oprop = 'https://schema.org/color'
-        elsif oname contains 'formaat' or oname contains 'maat' or oname contains 'size'
-          assign oprop = 'https://schema.org/size'
-        elsif oname contains 'materiaal' or oname contains 'afwerking'
-          assign oprop = 'https://schema.org/material'
-        else
-          assign oprop = 'https://schema.org/pattern'
-        endif
-      -%}
-      {{ oprop | json }}{% unless forloop.last %},{% endunless %}
-    {%- endfor -%}
-  ],
-  "hasVariant": [
-  {%- endunless %}
+  {%- liquid
+    assign am_varies_raw = ''
+      for am_opt in product.options_with_values
+          assign oname = am_opt.name | downcase
+              assign oprop = ''
+                  if oname contains 'kleur' or oname contains 'color' or oname contains 'colour'
+                        assign oprop = 'https://schema.org/color'
+                            elsif oname contains 'formaat' or oname contains 'maat' or oname contains 'size'
+                                  assign oprop = 'https://schema.org/size'
+                                      elsif oname contains 'materiaal' or oname contains 'afwerking'
+                                            assign oprop = 'https://schema.org/material'
+                                                endif
+                                                    if oprop != ''
+                                                          assign am_varies_raw = am_varies_raw | append: oprop | append: '|'
+                                                              endif
+                                                                endfor
+                                                                  assign am_varies_list = am_varies_raw | split: '|'
+                                                                  -%}
+                                                                  {%- if am_varies_list.size > 0 -%}
+                                                                  "variesBy": [
+                                                                    {%- for p in am_varies_list -%}
+                                                                        {{ p | json }}{% unless forloop.last %},{% endunless %}
+                                                                          {%- endfor -%}
+                                                                          ],
+                                                                          {%- endif -%}
+                                                                          "hasVariant": [
+                                                                            {%- endunless %}
   {%- for variant in product.variants -%}
     {%- liquid
       assign v_url = am_url | append: '?variant=' | append: variant.id
@@ -184,14 +192,16 @@
       "mpn": {{ variant.sku | json }},
       {%- endif %}
       {%- for option in variant.options -%}
-        {%- assign oname = product.options[forloop.index0] | downcase -%}
-        {%- if oname contains 'kleur' or oname contains 'color' -%}
-      "color": {{ option | json }},
-        {%- elsif oname contains 'formaat' or oname contains 'maat' or oname contains 'size' -%}
-      "size": {{ option | json }},
-        {%- endif -%}
-      {%- endfor %}
-    {%- else %}
+          {%- assign oname = product.options[forloop.index0] | downcase -%}
+            {%- if oname contains 'kleur' or oname contains 'color' or oname contains 'colour' -%}
+            "color": {{ option | json }},
+              {%- elsif oname contains 'formaat' or oname contains 'maat' or oname contains 'size' -%}
+              "size": {{ option | json }},
+                {%- elsif oname contains 'materiaal' or oname contains 'afwerking' -%}
+                "material": {{ option | json }},
+                  {%- endif -%}
+                  {%- endfor %}
+                      {%- else %}
   {%- if variant.sku != blank %}
   "sku": {{ variant.sku | json }},
   "mpn": {{ variant.sku | json }},
