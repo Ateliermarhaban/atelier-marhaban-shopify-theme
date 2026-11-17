@@ -30,12 +30,9 @@
 
 <script>
   (function () {
-    var openBtn = document.querySelector('[data-cart-scan-open]');
-    if (!openBtn || openBtn.dataset.ready) return;
-    openBtn.dataset.ready = '1';
-    var overlay = document.querySelector('[data-cart-scan-overlay]');
-    var video = overlay.querySelector('[data-cart-scan-video]');
-    var msg = overlay.querySelector('[data-cart-scan-msg]');
+    if (window.__amCartScan) return;
+    window.__amCartScan = true;
+    var overlay, video, msg;
     var stream = null, busy = false, detector = null, canvas = document.createElement('canvas');
     var ctx = canvas.getContext('2d', { willReadFrequently: true });
     var JSQR_URL = {{ 'jsqr.min.js' | asset_url | json }};
@@ -48,7 +45,7 @@
     }
     function stop() {
       if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
-      stream = null; overlay.hidden = true; document.documentElement.style.overflow = '';
+      stream = null; if (overlay) overlay.hidden = true; document.documentElement.style.overflow = '';
     }
     function productPath(text) {
       try {
@@ -83,7 +80,14 @@
       }
       requestAnimationFrame(tick);
     }
-    openBtn.addEventListener('click', function () {
+    document.addEventListener('click', function (e) {
+      if (e.target.closest('[data-cart-scan-close]')) { stop(); return; }
+      if (!e.target.closest('[data-cart-scan-open]')) return;
+      e.preventDefault();
+      overlay = document.querySelector('[data-cart-scan-overlay]');
+      video = overlay.querySelector('[data-cart-scan-video]');
+      msg = overlay.querySelector('[data-cart-scan-msg]');
+      if (overlay.parentNode !== document.body) document.body.appendChild(overlay);
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert('Je toestel laat geen camera toe in de browser. Scan de QR-code met de camera-app.');
         return;
@@ -100,6 +104,5 @@
         .then(tick)
         .catch(function () { msg.textContent = 'De camera kon niet openen. Geef de website toegang tot je camera of scan met de camera-app.'; });
     });
-    overlay.querySelector('[data-cart-scan-close]').addEventListener('click', stop);
   })();
 </script>
