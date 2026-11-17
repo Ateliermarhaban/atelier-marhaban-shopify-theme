@@ -42,6 +42,8 @@
       </div>
     {%- endif -%}
 
+    {%- render 'cart-scan' -%}
+
     <form action="{{ routes.cart_url }}" method="post" id="cartform" class="cart-form">
       <div class="cart-item-list">
         <div class="cart-item-list__body" data-merge-list="cart-items">

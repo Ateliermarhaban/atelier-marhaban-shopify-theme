@@ -1,0 +1,105 @@
+{%- comment -%}
+  Knop "Scan nog een product" in het winkelmandje (rek in de inkom, Lievegem).
+  Opent de camera in de pagina, leest de QR van een product (atelier-marhaban.com/p/...)
+  en legt het product in het mandje zonder de site te verlaten.
+{%- endcomment -%}
+<div class="cart-scan lightly-spaced-row align-center">
+  <button type="button" class="btn btn--secondary cart-scan__open" data-cart-scan-open>
+    <svg class="cart-scan__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.7l1.4-2h6.8l1.4 2h1.7A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.5" r="3.6"/></svg>
+    <span>Scan nog een product</span>
+  </button>
+</div>
+
+<div class="cart-scan__overlay" data-cart-scan-overlay hidden role="dialog" aria-modal="true" aria-label="Product scannen">
+  <video class="cart-scan__video" data-cart-scan-video playsinline muted></video>
+  <div class="cart-scan__frame" aria-hidden="true"></div>
+  <p class="cart-scan__msg" data-cart-scan-msg>Richt de camera op de QR-code van het product.</p>
+  <button type="button" class="btn cart-scan__close" data-cart-scan-close>Sluiten</button>
+</div>
+
+<style>
+  .cart-scan__open { display: inline-flex; align-items: center; gap: .5em; }
+  .cart-scan__icon { flex: none; }
+  .cart-scan__overlay { position: fixed; inset: 0; z-index: 9999; background: #2e2e2e; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .cart-scan__overlay[hidden] { display: none; }
+  .cart-scan__video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .cart-scan__frame { position: relative; width: min(64vw, 280px); aspect-ratio: 1; border: 2px solid #f5f1e8; border-radius: 12px; box-shadow: 0 0 0 100vmax rgba(46,46,46,.45); }
+  .cart-scan__msg { position: relative; margin: 1.5em 1em 1em; color: #f5f1e8; text-align: center; }
+  .cart-scan__close { position: relative; }
+</style>
+
+<script>
+  (function () {
+    var openBtn = document.querySelector('[data-cart-scan-open]');
+    if (!openBtn || openBtn.dataset.ready) return;
+    openBtn.dataset.ready = '1';
+    var overlay = document.querySelector('[data-cart-scan-overlay]');
+    var video = overlay.querySelector('[data-cart-scan-video]');
+    var msg = overlay.querySelector('[data-cart-scan-msg]');
+    var stream = null, busy = false, detector = null, canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d', { willReadFrequently: true });
+    var JSQR_URL = {{ 'jsqr.min.js' | asset_url | json }};
+
+    function loadJsQR() {
+      if (window.jsQR) return Promise.resolve();
+      return new Promise(function (res, rej) {
+        var s = document.createElement('script'); s.src = JSQR_URL; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+      });
+    }
+    function stop() {
+      if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
+      stream = null; overlay.hidden = true; document.documentElement.style.overflow = '';
+    }
+    function productPath(text) {
+      try {
+        var u = new URL(text, location.href);
+        if (!/(^|\.)atelier-marhaban\.com$/.test(u.hostname) && u.hostname !== location.hostname) return null;
+        if (u.pathname.indexOf('/p/') === 0 || u.pathname.indexOf('/cart/add') === 0) return u.pathname + u.search;
+      } catch (e) {}
+      return null;
+    }
+    function handle(text) {
+      var path = productPath(text);
+      if (!path) { msg.textContent = 'Deze code hoort niet bij een product van Atelier Marhaban.'; busy = false; return; }
+      msg.textContent = 'Toevoegen…';
+      fetch(path, { credentials: 'same-origin' })
+        .then(function () { stop(); location.href = {{ routes.cart_url | json }}; })
+        .catch(function () { msg.textContent = 'Toevoegen lukte niet. Probeer opnieuw.'; busy = false; });
+    }
+    function tick() {
+      if (!stream) return;
+      if (!busy && video.readyState >= 2) {
+        if (detector) {
+          detector.detect(video).then(function (codes) {
+            if (codes.length && !busy) { busy = true; handle(codes[0].rawValue); }
+          }).catch(function () {});
+        } else if (window.jsQR) {
+          var w = video.videoWidth, h = video.videoHeight, scale = Math.min(1, 640 / Math.max(w, h));
+          canvas.width = w * scale; canvas.height = h * scale;
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          var code = window.jsQR(ctx.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height, { inversionAttempts: 'dontInvert' });
+          if (code && code.data) { busy = true; handle(code.data); }
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+    openBtn.addEventListener('click', function () {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Je toestel laat geen camera toe in de browser. Scan de QR-code met de camera-app.');
+        return;
+      }
+      overlay.hidden = false; busy = false; document.documentElement.style.overflow = 'hidden';
+      msg.textContent = 'Richt de camera op de QR-code van het product.';
+      var ready = ('BarcodeDetector' in window)
+        ? window.BarcodeDetector.getSupportedFormats().then(function (f) {
+            if (f.indexOf('qr_code') > -1) { detector = new window.BarcodeDetector({ formats: ['qr_code'] }); } else { return loadJsQR(); }
+          })
+        : loadJsQR();
+      Promise.all([ready, navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })])
+        .then(function (r) { stream = r[1]; video.srcObject = stream; return video.play(); })
+        .then(tick)
+        .catch(function () { msg.textContent = 'De camera kon niet openen. Geef de website toegang tot je camera of scan met de camera-app.'; });
+    });
+    overlay.querySelector('[data-cart-scan-close]').addEventListener('click', stop);
+  })();
+</script>
