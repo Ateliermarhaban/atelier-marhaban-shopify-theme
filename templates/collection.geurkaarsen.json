@@ -104,10 +104,47 @@
       "settings": {
         "title": "Veelgestelde vragen"
       }
+    },
+    "groepsfoto_kaarsen": {
+      "type": "image-with-text-overlay",
+      "blocks": {
+        "gk_head": {
+          "type": "heading",
+          "settings": {
+            "title": "Klaar om te geven.",
+            "heading_max_width": 14,
+            "title_size": 56,
+            "title_size_mobile": 32,
+            "use_h1": false
+          }
+        },
+        "gk_text": {
+          "type": "text",
+          "settings": {
+            "text": "<p>Met de hand gemaakt in Marokko. Als de kaars op is, blijft het omhulsel als pot, vaas of doos.</p>",
+            "enlarge_text": false
+          }
+        }
+      },
+      "block_order": [
+        "gk_head",
+        "gk_text"
+      ],
+      "settings": {
+        "image": "shopify://shop_images/am-kaarsen-groep-leopard-zebra-raffia.jpg",
+        "height": "fixed",
+        "height_desktop": 560,
+        "height_mobile": 420,
+        "full_width": true,
+        "text_alignment": "bottom left",
+        "mobile_overlay_under": false,
+        "overlay_style": "shadow"
+      }
     }
   },
   "order": [
     "main",
+    "groepsfoto_kaarsen",
     "collapsible_tabs_TKAhxY"
   ]
 }
