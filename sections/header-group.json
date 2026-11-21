@@ -178,7 +178,7 @@
         "speed": 30,
         "direction": "right",
         "font": "base",
-        "space": 80
+        "space": 140
       }
     }
   },
