@@ -152,34 +152,25 @@
             "stencil_all_text": false,
             "stencil_text": ""
           }
-        },
-        "t3": {
-          "type": "text",
-          "settings": {
-            "text": "Bestel vóór 18 december, vóór Kerst in huis",
-            "color": "#dec8b8",
-            "link": "shopify://collections/geurkaarsen-1",
-            "use_h1": false,
-            "stencil_all_text": false,
-            "stencil_text": ""
-          }
         }
       },
       "block_order": [
         "t1",
-        "t2",
-        "t3"
+        "t2"
       ],
       "settings": {
         "full_width": true,
         "color_scheme": "2",
         "text_size": 16,
         "vertical_padding": 8,
-        "speed": 30,
+        "speed": 2,
         "direction": "right",
         "font": "base",
         "space": 140
-      }
+      },
+      "custom_css": [
+        ".marquee-item {padding-right: 360px !important;}"
+      ]
     }
   },
   "order": [
