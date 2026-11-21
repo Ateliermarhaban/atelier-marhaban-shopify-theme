@@ -1,0 +1,92 @@
+{%- liquid
+  assign src = section.settings.collection
+  if src == blank
+    assign src = collection
+  endif
+  assign limit = section.settings.limit
+-%}
+<div class="am-kog container" id="am-kog-{{ section.id }}">
+  {%- if section.settings.heading != blank -%}<h2 class="am-kog__title">{{ section.settings.heading }}</h2>{%- endif -%}
+  {%- if section.settings.intro != blank -%}<div class="am-kog__intro">{{ section.settings.intro }}</div>{%- endif -%}
+  {%- if section.settings.note != blank -%}<p class="am-kog__note">{{ section.settings.note }}</p>{%- endif -%}
+  <ul class="am-kog__grid" role="list">
+    {%- assign shown = 0 -%}
+    {%- assign firsts = ',' -%}
+    {%- assign pinned_handles = ',' -%}
+    {%- for p in section.settings.pinned -%}{%- assign pinned_handles = pinned_handles | append: p.handle | append: ',' -%}{%- endfor -%}
+    {%- for pass in (1..2) -%}
+      {%- for round in (1..2) -%}
+        {%- if round == 1 -%}{%- assign plist = section.settings.pinned -%}{%- else -%}{%- assign plist = src.products -%}{%- endif -%}
+        {%- for p in plist -%}
+          {%- assign key = ',' | append: p.handle | append: ',' -%}
+          {%- if round == 2 and pinned_handles contains key -%}{%- continue -%}{%- endif -%}
+          {%- assign took = false -%}
+          {%- for v in p.variants -%}
+            {%- unless v.inventory_management == 'shopify' and v.inventory_quantity > 0 -%}{%- continue -%}{%- endunless -%}
+            {%- assign vkey = ',' | append: v.id | append: ',' -%}
+            {%- if pass == 1 -%}
+              {%- if took -%}{%- break -%}{%- endif -%}
+              {%- assign took = true -%}
+              {%- assign firsts = firsts | append: v.id | append: ',' -%}
+            {%- else -%}
+              {%- if firsts contains vkey -%}{%- continue -%}{%- endif -%}
+            {%- endif -%}
+            {%- assign shown = shown | plus: 1 -%}
+            {%- assign img = v.featured_media.preview_image | default: p.featured_media.preview_image -%}
+            <li class="am-kog__card{% if shown > limit %} is-extra{% endif %}">
+              <a href="{{ v.url }}" class="am-kog__link">
+                <div class="am-kog__img">
+                  {%- if img -%}{{ img | image_url: width: 600 | image_tag: loading: 'lazy', widths: '300,450,600', sizes: '(min-width: 990px) 16vw, 33vw', alt: p.title }}{%- endif -%}
+                </div>
+                <span class="am-kog__name">{{ p.title }}</span>
+                <span class="am-kog__var">{{ v.title | replace: ' / ', ' · ' }}</span>
+                <span class="am-kog__price">{{ v.price | money }}</span>
+              </a>
+            </li>
+          {%- endfor -%}
+        {%- endfor -%}
+      {%- endfor -%}
+    {%- endfor -%}
+  </ul>
+  {%- if shown > limit -%}
+    <div class="am-kog__more"><button type="button" class="btn btn--secondary" onclick="this.closest('.am-kog').classList.add('is-open');this.parentNode.remove();">{{ section.settings.more_label | replace: '[n]', shown }}</button></div>
+  {%- endif -%}
+  {%- if shown == 0 -%}<p class="am-kog__note">{{ section.settings.empty_text }}</p>{%- endif -%}
+</div>
+<style>
+  #am-kog-{{ section.id }} { padding-top: 40px; padding-bottom: 24px; }
+  #am-kog-{{ section.id }} .am-kog__title { margin: 0 0 12px; text-align: center; }
+  #am-kog-{{ section.id }} .am-kog__intro { max-width: 640px; margin: 0 auto 6px; text-align: center; }
+  #am-kog-{{ section.id }} .am-kog__note { max-width: 640px; margin: 0 auto 28px; text-align: center; color: #5E7361; font-weight: 600; }
+  #am-kog-{{ section.id }} .am-kog__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 24px 16px; }
+  #am-kog-{{ section.id }} .is-extra { display: none; }
+  #am-kog-{{ section.id }}.is-open .is-extra { display: block; }
+  #am-kog-{{ section.id }} .am-kog__more { text-align: center; margin-top: 28px; }
+  #am-kog-{{ section.id }} .am-kog__link { display: flex; flex-direction: column; gap: 2px; text-decoration: none; color: inherit; }
+  #am-kog-{{ section.id }} .am-kog__img { aspect-ratio: 1 / 1; background: #f4efe8; overflow: hidden; margin-bottom: 10px; }
+  #am-kog-{{ section.id }} .am-kog__img img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .4s ease; }
+  #am-kog-{{ section.id }} .am-kog__link:hover img { transform: scale(1.03); }
+  #am-kog-{{ section.id }} .am-kog__name { font-weight: 600; }
+  #am-kog-{{ section.id }} .am-kog__var { font-size: .9rem; opacity: .8; }
+  #am-kog-{{ section.id }} .am-kog__price { margin-top: 4px; }
+  @media (max-width: 1100px) { #am-kog-{{ section.id }} .am-kog__grid { grid-template-columns: repeat(4, 1fr); } }
+  @media (max-width: 600px) { #am-kog-{{ section.id }} .am-kog__grid { grid-template-columns: repeat(3, 1fr); gap: 18px 10px; } }
+</style>
+{% schema %}
+{
+  "name": "Kaarsen op voorraad",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    { "type": "collection", "id": "collection", "label": "Collectie", "info": "Leeg = de collectie van de pagina" },
+    { "type": "text", "id": "heading", "label": "Titel", "default": "Vóór Kerst in huis." },
+    { "type": "richtext", "id": "intro", "label": "Intro", "default": "<p>Nieuw in België: je ziet ze hier nog nergens anders. Deze kaarsen staan klaar in Lievegem, van de meeste is er één stuk.</p>" },
+    { "type": "text", "id": "note", "label": "Opvallende regel", "default": "Bestel vóór 18 december en ze staan er voor de feestdagen." },
+    { "type": "product_list", "id": "pinned", "label": "Eerst tonen", "limit": 6, "info": "Deze kaarsen komen vooraan. Daarna één stuk per model, dan de rest." },
+    { "type": "range", "id": "limit", "label": "Aantal stukken eerst tonen", "min": 6, "max": 48, "step": 6, "default": 12 },
+    { "type": "text", "id": "more_label", "label": "Knop meer tonen ([n] = aantal)", "default": "Toon alle [n] stukken" },
+    { "type": "text", "id": "empty_text", "label": "Tekst als niets op voorraad is", "default": "Alles op voorraad is de deur uit. Elke kaars blijft te bestellen." }
+  ],
+  "presets": [{ "name": "Kaarsen op voorraad" }]
+}
+{% endschema %}
