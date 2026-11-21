@@ -40,6 +40,16 @@
                 </div>
                 <span class="am-kog__name">{{ p.title }}</span>
                 <span class="am-kog__var">{{ v.title | replace: ' / ', ' · ' }}</span>
+                {%- assign am_d = v.metafields.custom.diameter.value | remove: 'cm' | strip -%}
+                {%- assign am_h = v.metafields.custom.hoogte.value | remove: 'cm' | strip -%}
+                {%- assign am_b = v.metafields.custom.brandtijd.value | remove: 'h' | strip -%}
+                {%- if am_d != blank or am_b != blank -%}
+                  <span class="am-kog__spec">
+                    {%- if am_d != blank -%}Ø {{ am_d }}{% if am_h != blank %} × {{ am_h }}{% endif %} cm{%- endif -%}
+                    {%- if am_d != blank and am_b != blank %} · {% endif -%}
+                    {%- if am_b != blank -%}{{ am_b }} branduren{%- endif -%}
+                  </span>
+                {%- endif -%}
                 <span class="am-kog__price">{{ v.price | money }}</span>
               </a>
             </li>
@@ -68,6 +78,7 @@
   #am-kog-{{ section.id }} .am-kog__link:hover img { transform: scale(1.03); }
   #am-kog-{{ section.id }} .am-kog__name { font-weight: 600; }
   #am-kog-{{ section.id }} .am-kog__var { font-size: .9rem; opacity: .8; }
+  #am-kog-{{ section.id }} .am-kog__spec { font-size: .8rem; opacity: .7; }
   #am-kog-{{ section.id }} .am-kog__price { margin-top: 4px; }
   @media (max-width: 1100px) { #am-kog-{{ section.id }} .am-kog__grid { grid-template-columns: repeat(4, 1fr); } }
   @media (max-width: 600px) { #am-kog-{{ section.id }} .am-kog__grid { grid-template-columns: repeat(3, 1fr); gap: 18px 10px; } }
