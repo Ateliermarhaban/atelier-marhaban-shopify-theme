@@ -21,10 +21,28 @@
             "bg_gradient": "",
             "text_color": "#ffffff"
           }
+        },
+        "announcement-2": {
+          "type": "announcement",
+          "disabled": false,
+          "settings": {
+            "text": "Nieuw in België: geurkaarsen uit Marrakech. <a href=\"/collections/geurkaarsen-1\">Bekijk wat klaarstaat</a>",
+            "show_countdown": false,
+            "hide_on_end": false,
+            "end_date": "",
+            "end_time": "",
+            "number_font": "base",
+            "countdown_separator": "box",
+            "use_custom_colors": false,
+            "bg_color": "#202020",
+            "bg_gradient": "",
+            "text_color": "#ffffff"
+          }
         }
       },
       "block_order": [
-        "announcement-1"
+        "announcement-1",
+        "announcement-2"
       ],
       "settings": {
         "message_font_size": 14,
