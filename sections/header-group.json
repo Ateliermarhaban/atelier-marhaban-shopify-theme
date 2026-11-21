@@ -7,7 +7,7 @@
       "blocks": {
         "announcement-1": {
           "type": "announcement",
-          "disabled": false,
+          "disabled": true,
           "settings": {
             "text": "Kaarsen gratis verstuurd tot 23 december. <a href=\"/collections/geurkaarsen-1\">Vóór Kerst in huis</a>",
             "show_countdown": false,
@@ -24,7 +24,7 @@
         },
         "announcement-2": {
           "type": "announcement",
-          "disabled": false,
+          "disabled": true,
           "settings": {
             "text": "Nieuw in België: geurkaarsen uit Marrakech. <a href=\"/collections/geurkaarsen-1\">Bekijk wat klaarstaat</a>",
             "show_countdown": false,
@@ -127,9 +127,63 @@
         "head_not_mob_text": "Gratis verzending vanaf € 150",
         "head_not_mob_url": ""
       }
+    },
+    "kerst-rolbalk": {
+      "type": "scrolling-banner",
+      "blocks": {
+        "t1": {
+          "type": "text",
+          "settings": {
+            "text": "Kaarsen gratis verstuurd tot 23 december",
+            "color": "#dec8b8",
+            "link": "shopify://collections/geurkaarsen-1",
+            "use_h1": false,
+            "stencil_all_text": false,
+            "stencil_text": ""
+          }
+        },
+        "t2": {
+          "type": "text",
+          "settings": {
+            "text": "Nieuw in België: geurkaarsen uit Marrakech",
+            "color": "#f5f1e8",
+            "link": "shopify://collections/geurkaarsen-1",
+            "use_h1": false,
+            "stencil_all_text": false,
+            "stencil_text": ""
+          }
+        },
+        "t3": {
+          "type": "text",
+          "settings": {
+            "text": "Bestel vóór 18 december, vóór Kerst in huis",
+            "color": "#dec8b8",
+            "link": "shopify://collections/geurkaarsen-1",
+            "use_h1": false,
+            "stencil_all_text": false,
+            "stencil_text": ""
+          }
+        }
+      },
+      "block_order": [
+        "t1",
+        "t2",
+        "t3"
+      ],
+      "settings": {
+        "full_width": true,
+        "color_scheme": "2",
+        "text_size": 16,
+        "vertical_padding": 8,
+        "speed": 30,
+        "direction": "right",
+        "font": "base",
+        "space": 80
+      }
     }
   },
   "order": [
+    "kerst-rolbalk",
     "announcement-bar",
     "header",
     "store-messages"
