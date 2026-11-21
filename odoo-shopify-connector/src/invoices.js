@@ -24,7 +24,7 @@
 import * as odoo from './odoo.js';
 import * as shopify from './shopify.js';
 import { config } from './config.js';
-import { parseBeNumber } from './vat.js';
+import { parseBeNumber, extractVatFromText } from './vat.js';
 
 const INVOICE_TAG = 'factuur-odoo';
 const SALES_JOURNAL_ID = 9; // Dagboek "Sales", code INV
@@ -32,6 +32,8 @@ const TAX_NAME = '21% incl.';
 const FIRST_DRAFTS = 5;
 // Bestellingen die bewust nooit gefactureerd worden (zoals #AM1009 in de voorraadsync).
 const SKIP_ORDER_NAMES = new Set(['#AM1008']); // eigen testverkoop (TJM)
+const OWN_VAT_DIGITS = '0562882189'; // TJM BV zelf: nooit aan onszelf factureren
+const ERROR_TAG = 'factuur-fout';
 const SEND_ENABLED = String(process.env.INVOICE_SEND_ENABLED || '').toLowerCase() === 'true';
 
 function log(...args) {
@@ -103,8 +105,6 @@ async function buildLines(order, taxId) {
  */
 async function planOrder(order, info, taxId) {
   const ba = order.billing_address || {};
-  const companyName = info.company || ba.company
-    || [order.customer.first_name, order.customer.last_name].filter(Boolean).join(' ') || info.email;
   const reasons = [];
 
   // 1. Welk nummer?
@@ -122,6 +122,10 @@ async function planOrder(order, info, taxId) {
     if (vies.valid) { kind = 'vat'; vatValue = normVat(info.vat); }
     else reasons.push('geen geldig btw- of ondernemingsnummer');
   }
+
+  const companyName = info.company || (vies && vies.name) || (order.source_name === 'pos' ? ba.company : '')
+    || [ba.first_name, ba.last_name].filter(Boolean).join(' ')
+    || [order.customer && order.customer.first_name, order.customer && order.customer.last_name].filter(Boolean).join(' ') || info.email;
 
   // 2. Bestaand bedrijf en adres.
   const existingId = kind === 'vat'
@@ -156,7 +160,7 @@ async function planOrder(order, info, taxId) {
   // 4. Peppol en actie.
   const isBE = (companyCountry || (kind === 'vat' ? vatValue.slice(0, 2) : 'BE')) === 'BE';
   const peppol = kind === 'vat' && isBE && peppolState === 'valid';
-  const email = info.email || order.customer.email || '';
+  const email = info.email || (order.customer && order.customer.email) || order.email || '';
 
   let action;
   if (reasons.length) action = `concept (${reasons.join('; ')})`;
@@ -173,7 +177,7 @@ async function planOrder(order, info, taxId) {
 }
 
 function logPlan(order, plan) {
-  const cust = `${order.customer.first_name || ''} ${order.customer.last_name || ''}`.trim();
+  const cust = [order.customer && order.customer.first_name, order.customer && order.customer.last_name].filter(Boolean).join(" ") || (order.billing_address && [order.billing_address.first_name, order.billing_address.last_name].filter(Boolean).join(" ")) || "";
   log(
     `[factuur] ${order.name} | klant ${cust || '-'} | bedrijf ${plan.companyName} | ${plan.nummer}` +
     ` | totaal ${plan.total.toFixed(2)} incl. btw | betaling ${plan.method}` +
@@ -195,8 +199,10 @@ async function executePlan(order, plan) {
   if (created) log(`[factuur] ${order.name}: bedrijf aangemaakt (${plan.nummer}).`);
 
   // Contactpersoon.
-  const personName = [order.customer.first_name, order.customer.last_name].filter(Boolean).join(' ') || plan.email;
-  if (plan.email) await odoo.findOrCreatePersonUnder(companyId, { name: personName, email: plan.email });
+  const bill = order.billing_address || {};
+  const personName = [bill.first_name || (order.customer && order.customer.first_name), bill.last_name || (order.customer && order.customer.last_name)]
+    .filter(Boolean).join(' ') || plan.email;
+  const personId = plan.email ? await odoo.findOrCreatePersonUnder(companyId, { name: personName, email: plan.email }) : null;
 
   // Adres aanvullen (overschrijft niets).
   const ba = order.billing_address || {};
@@ -230,44 +236,92 @@ async function executePlan(order, plan) {
   await odoo.reconcileWithInvoice(invoiceId, payId, companyId);
   log(`[factuur] ${order.name}: geboekt en betaald (${plan.method}).`);
 
-  // Verzenden: alleen als het plan dat zegt. PEPPOL-ONTBREEKT wordt niet verstuurd.
-  const sends = plan.action !== 'boeken, niet versturen (PEPPOL-ONTBREEKT)';
-  if (plan.action === 'boeken + Peppol + mail') await odoo.setPeppolIfVerified(companyId);
+  // Verzenden. Peppol wordt nu pas echt gecontroleerd, op het bedrijf zoals het
+  // in Odoo staat (ook een net aangemaakt bedrijf, ook op ondernemingsnummer).
+  const state = await odoo.checkPeppol(companyId);
+  const viaPeppol = state === 'valid';
+  let finalAction;
+  if (viaPeppol) finalAction = 'boeken + Peppol + mail';
+  else if (plan.kind === 'vat' && plan.isBE) finalAction = 'boeken, niet versturen (PEPPOL-ONTBREEKT)';
+  else finalAction = 'boeken + mail';
+  if (finalAction !== plan.action) log(`[factuur] ${order.name}: na Peppol-controle (${state || 'onbekend'}): ${finalAction}.`);
+  if (finalAction.includes('PEPPOL-ONTBREEKT')) {
+    log(`::warning::[factuur] ${order.name}: PEPPOL-ONTBREEKT. Belgisch btw-nummer ${plan.vatValue} staat niet op Peppol. Geboekt, niet verstuurd: neem contact op met de klant.`);
+  }
+  const sends = !finalAction.includes('PEPPOL-ONTBREEKT');
+  if (viaPeppol) await odoo.setPeppolIfVerified(companyId);
   if (sends) {
-    const viaPeppol = plan.action === 'boeken + Peppol + mail';
     if (!SEND_ENABLED) {
       log(`[factuur] ${order.name}: verzending UIT (INVOICE_SEND_ENABLED). Zou ${viaPeppol ? 'via Peppol + ' : ''}mail naar ${plan.email} gaan.`);
     } else {
-      await odoo.sendInvoice(invoiceId);
+      await odoo.sendInvoice(invoiceId, { viaPeppol, mailPartnerId: personId });
       log(`[factuur] ${order.name}: verzonden ${viaPeppol ? 'via Peppol + ' : ''}per mail naar ${plan.email}.`);
     }
   }
 }
 
+/**
+ * Btw-gegevens van een bestelling:
+ *  - webshop: uit het bedrijfsveld van de checkout ("Bedrijfsnaam en btw-nummer"),
+ *    eerst het factuuradres, dan het verzendadres;
+ *  - POS: uit het klantgegevens-formulier (metafields), zoals voorheen.
+ */
+async function vatInfoFor(order) {
+  if (order.source_name !== 'pos') {
+    for (const addr of [order.billing_address, order.shipping_address]) {
+      const hit = addr && extractVatFromText(addr.company);
+      if (hit) return { vat: hit.vat, company: hit.company, email: order.email || order.contact_email || '' };
+    }
+    return null;
+  }
+  if (!order.customer) return null; // anonieme POS-verkoop
+  return shopify.getCustomerVatInfo(order.customer.id);
+}
+
 export async function syncInvoices() {
   const taxId = await odoo.getTaxIdByName(TAX_NAME);
-  const orders = await shopify.listPosOrdersNeedingInvoice({ sinceDays: 7, invoiceTag: INVOICE_TAG });
+  const orders = await shopify.listPosOrdersNeedingInvoice({ sinceDays: 7, invoiceTag: INVOICE_TAG, includeWeb: true });
   const dry = config.service.dryRun;
-  log(`[factuur] ${orders.length} POS-bestelling(en) zonder factuur${dry ? ' (dry-run)' : ''}.`);
+  let n = 0;
 
   for (const order of orders) {
-    if (SKIP_ORDER_NAMES.has(order.name)) {
-      log(`[factuur] ${order.name} handmatig uitgesloten -> overslaan.`);
+    if (SKIP_ORDER_NAMES.has(order.name)) continue;
+    let info;
+    try {
+      info = await vatInfoFor(order);
+    } catch (err) {
+      log(`[factuur] FOUT ${order.name} bij het lezen van het btw-nummer:`, err.message);
       continue;
     }
-    if (!order.customer) continue; // anonieme POS-verkoop
-    const info = await shopify.getCustomerVatInfo(order.customer.id);
     if (!info || !normVat(info.vat)) continue; // geen nummer ingevuld
     const infoN = { ...info, vat: normVat(info.vat) };
+    if (infoN.vat.replace(/^BE/, '') === OWN_VAT_DIGITS) {
+      log(`[factuur] ${order.name}: btw-nummer van TJM zelf -> overslaan.`);
+      continue;
+    }
+    n += 1;
 
+    let plan;
     try {
-      const plan = await planOrder(order, infoN, taxId);
+      plan = await planOrder(order, infoN, taxId);
       logPlan(order, plan);
-      if (dry) continue;
-      await executePlan(order, plan);
-      await shopify.tagOrderSynced(order, INVOICE_TAG);
     } catch (err) {
-      log(`[factuur] FOUT ${order.name}:`, err.message);
+      log(`[factuur] FOUT ${order.name} bij het plannen (niets geboekt, volgende run opnieuw):`, err.message);
+      continue;
+    }
+    if (dry) continue;
+
+    // Hoogstens één factuur per bestelling: het label komt VOOR het boeken.
+    // Lukt het boeken of versturen niet, dan label factuur-fout en een
+    // waarschuwing; die bestelling wordt nooit automatisch opnieuw gefactureerd.
+    await shopify.tagOrderSynced(order, INVOICE_TAG);
+    order.tags = [order.tags, INVOICE_TAG].filter(Boolean).join(', ');
+    try {
+      await executePlan(order, plan);
+    } catch (err) {
+      log(`::warning::[factuur] FOUT ${order.name} na het labelen: ${err.message}. Met de hand nakijken in Odoo.`);
+      try { await shopify.tagOrderSynced(order, ERROR_TAG); } catch (e) { log('[factuur] label factuur-fout mislukt:', e.message); }
     }
   }
+  log(`[factuur] ${n} bestelling(en) met btw- of ondernemingsnummer zonder factuur${dry ? ' (dry-run)' : ''}.`);
 }

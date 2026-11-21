@@ -462,5 +462,13 @@
       "sku": "SKU1234",
       "description": "A description of the product, including details such as build quality, materials used and reasons to purchase."
     }
+  },
+  "shopify": {
+    "checkout": {
+      "contact": {
+        "company_label": "Company name and VAT number",
+        "optional_company_label": "Company name and VAT number (optional)"
+      }
+    }
   }
 }

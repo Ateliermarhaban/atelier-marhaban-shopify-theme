@@ -451,16 +451,18 @@ export { shopifyFetch, shopifyGraphql };
 /**
  * POS-bestellingen van de laatste sinceDays dagen zonder de factuur-tag.
  */
-export async function listPosOrdersNeedingInvoice({ sinceDays = 7, invoiceTag = 'factuur-odoo' } = {}) {
+export async function listPosOrdersNeedingInvoice({ sinceDays = 7, invoiceTag = 'factuur-odoo', includeWeb = false } = {}) {
   const since = new Date(Date.now() - sinceDays * 86400000).toISOString();
   const out = [];
   let path = `/orders.json?status=any&limit=250&created_at_min=${encodeURIComponent(since)}`;
   while (path) {
     const { json, link } = await shopifyRequest(path);
     for (const order of json.orders || []) {
-      if (order.source_name !== 'pos') continue;
+      if (!includeWeb && order.source_name !== 'pos') continue;
+      if (order.cancelled_at) continue;
+      if (order.financial_status && !['paid', 'partially_refunded'].includes(order.financial_status)) continue;
       const tags = (order.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
-      if (!tags.includes(invoiceTag)) out.push(order);
+      if (!tags.includes(invoiceTag) && !tags.includes('factuur-fout')) out.push(order);
     }
     const next = parseNextPageInfo(link);
     path = next ? `/orders.json?limit=250&page_info=${next}` : null;

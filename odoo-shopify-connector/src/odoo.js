@@ -656,16 +656,40 @@ export async function reconcileWithInvoice(invoiceId, paymentId, companyId) {
     ['move_id', '=', paymentId], ['account_id', '=', receivable], ['partner_id', '=', companyId],
   ]], { limit: 1 });
   if (!invLines.length || !payLines.length) throw new Error('Regels om af te punten niet gevonden.');
-  await execute('account.move.line', 'reconcile', [[...invLines, ...payLines]]);
+  try {
+    await execute('account.move.line', 'reconcile', [[...invLines, ...payLines]]);
+  } catch (err) {
+    if (!/cannot marshal None/i.test(String(err && err.message))) throw err;
+  }
   return true;
 }
 
+const isNoneFault = (err) => /cannot marshal None/i.test(String(err && err.message));
+
 /**
- * Verstuur een geboekte factuur (Peppol voor BE). NIET GETEST tegen Odoo 20:
- * wordt alleen aangeroepen als INVOICE_SEND_ENABLED=true.
+ * Verstuur een geboekte factuur via de verzendwizard van Odoo 20: per mail met
+ * PDF, en via Peppol als viaPeppol. (account.move.action_send_and_print opent
+ * enkel de wizard en verstuurt niets.) Daarna wordt gecontroleerd dat Odoo de
+ * factuur als verstuurd markeert; anders volgt een fout.
  */
-export async function sendInvoice(invoiceId) {
-  return execute('account.move', 'action_send_and_print', [[invoiceId]]);
+export async function sendInvoice(invoiceId, { viaPeppol = false, mailPartnerId = null } = {}) {
+  const ctx = { context: { active_model: 'account.move', active_ids: [invoiceId], active_id: invoiceId } };
+  const wizardId = await execute('account.move.send.wizard', 'create', [{ move_id: invoiceId }], ctx);
+  const methods = viaPeppol ? ['email', 'peppol'] : ['email'];
+  const vals = { sending_methods: methods };
+  // De mail gaat naar de contactpersoon met e-mailadres, niet naar het bedrijf zelf.
+  if (mailPartnerId) vals.mail_partner_ids = [[6, 0, [mailPartnerId]]];
+  await execute('account.move.send.wizard', 'write', [[wizardId], vals], ctx);
+  try {
+    await execute('account.move.send.wizard', 'action_send_and_print', [[wizardId]], ctx);
+  } catch (err) {
+    if (!isNoneFault(err)) throw err;
+  }
+  const [mv] = await execute('account.move', 'read', [[invoiceId], ['is_move_sent', 'name']]);
+  if (!mv || !mv.is_move_sent) {
+    throw new Error(`Factuur ${mv ? mv.name : invoiceId} staat na verzenden niet als verstuurd in Odoo.`);
+  }
+  return mv.name;
 }
 
 /** Read-only: id van een bestaand bedrijf op btw-nummer, of null. Maakt niets aan. */
@@ -698,4 +722,20 @@ export async function findOrCreateCompanyByRegistry({ name, digits }) {
     is_company: true,
   }]);
   return { id, created: true };
+}
+
+/**
+ * Peppol-registratie van een partner opnieuw laten controleren (op btw- of
+ * ondernemingsnummer) en de status teruggeven: 'valid' als de partner via Peppol
+ * kan ontvangen. Odoo 20 geeft hier None terug; XML-RPC meldt dan "cannot
+ * marshal None" terwijl de controle wel gebeurd is.
+ */
+export async function checkPeppol(companyId) {
+  try {
+    await execute('res.partner', 'button_account_peppol_check_partner_endpoint', [[companyId]]);
+  } catch (err) {
+    if (!/cannot marshal None/i.test(String(err && err.message))) throw err;
+  }
+  const r = await execute('res.partner', 'read', [[companyId], ['peppol_verification_state']]);
+  return r && r[0] ? r[0].peppol_verification_state || null : null;
 }
