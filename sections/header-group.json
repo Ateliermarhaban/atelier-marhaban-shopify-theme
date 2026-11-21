@@ -139,18 +139,18 @@
             "link": "shopify://collections/geurkaarsen-1",
             "use_h1": false,
             "stencil_all_text": false,
-            "stencil_text": ""
+            "stencil_text": "gratis"
           }
         },
         "t2": {
           "type": "text",
           "settings": {
             "text": "Nieuw in België: geurkaarsen uit Marrakech",
-            "color": "#f5f1e8",
+            "color": "#dec8b8",
             "link": "shopify://collections/geurkaarsen-1",
             "use_h1": false,
             "stencil_all_text": false,
-            "stencil_text": ""
+            "stencil_text": "Nieuw"
           }
         }
       },
@@ -169,7 +169,8 @@
         "space": 140
       },
       "custom_css": [
-        ".marquee-item {padding-right: 360px !important;}"
+        ".marquee-item {padding-right: 360px !important;}",
+        ".marquee-content .marquee-stencil-this {color: #ffffff !important; text-shadow: none !important; font-weight: 700;}"
       ]
     }
   },
