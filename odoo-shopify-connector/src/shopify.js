@@ -202,11 +202,16 @@ export async function listUnsyncedOrders({ sinceDays = 7, syncedTag = 'odoo-sync
 export async function tagOrderSynced(order, syncedTag = 'odoo-synced') {
   const tags = (order.tags || '').split(',').map((t) => t.trim()).filter(Boolean);
   if (tags.includes(syncedTag)) return;
-  tags.push(syncedTag);
-  await shopifyFetch(`/orders/${order.id}.json`, {
-    method: 'PUT',
-    body: { order: { id: order.id, tags: tags.join(', ') } },
-  });
+  // tagsAdd voegt enkel toe en overschrijft geen labels die intussen door een
+  // andere stap gezet zijn (de oude PUT verving de volledige taglijst).
+  const mutation = `mutation($id: ID!, $tags: [String!]!) {
+    tagsAdd(id: $id, tags: $tags) { userErrors { field message } }
+  }`;
+  const data = await shopifyGraphql(mutation, { id: `gid://shopify/Order/${order.id}`, tags: [syncedTag] });
+  const errs = data && data.tagsAdd ? data.tagsAdd.userErrors : [];
+  if (errs && errs.length) {
+    throw new Error(`Label '${syncedTag}' op order ${order.name || order.id} mislukt: ${errs.map((e) => e.message).join('; ')}`);
+  }
 }
 
 /**

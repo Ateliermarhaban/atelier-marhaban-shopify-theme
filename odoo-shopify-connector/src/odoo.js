@@ -215,7 +215,19 @@ export async function setOnHandQty(sku, newQty) {
   }
 
   // Telling toepassen zodat de on-hand echt wijzigt.
-  await execute('stock.quant', 'action_apply_inventory', [[quantId]]);
+  // Odoo 20 geeft hier None terug; XML-RPC kan dat niet doorsturen en meldt
+  // "cannot marshal None", terwijl de telling WEL is toegepast. Die fout
+  // vangen we op en we controleren daarna het resultaat in Odoo zelf.
+  try {
+    await execute('stock.quant', 'action_apply_inventory', [[quantId]]);
+  } catch (err) {
+    if (!/cannot marshal None/i.test(String(err && err.message))) throw err;
+  }
+  const quant = await execute('stock.quant', 'read', [[quantId], ['quantity']]);
+  const actual = quant && quant[0] ? quant[0].quantity : null;
+  if (actual !== newQty) {
+    throw new Error(`Telling voor SKU "${sku}" niet toegepast: Odoo toont ${actual}, verwacht ${newQty}.`);
+  }
   return newQty;
 }
 

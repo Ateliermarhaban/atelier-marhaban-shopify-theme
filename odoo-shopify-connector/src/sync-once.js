@@ -17,6 +17,7 @@ function log(...args) {
 }
 
 const SYNCED_TAG = 'odoo-synced';
+const ERROR_TAG = 'odoo-sync-fout';
 
 // Orders die handmatig worden afgehandeld en NOOIT automatisch geboekt mogen
 // worden (anders dubbel afgeboekt). Match op order-naam, bv. '#AM1009'.
@@ -39,6 +40,14 @@ async function shopifyToOdoo() {
       }
       continue;
     }
+    // Hoogstens één keer afboeken: het label komt VOOR het afboeken op de order.
+    // Mislukt daarna een regel, dan krijgt de order het label 'odoo-sync-fout'
+    // en een logregel; die regel wordt met de hand rechtgezet, nooit
+    // automatisch opnieuw afgeboekt (dat gaf op 14 en 15/11 dubbele afboekingen).
+    if (!config.service.dryRun) {
+      await shopify.tagOrderSynced(order, SYNCED_TAG);
+      order.tags = [order.tags, SYNCED_TAG].filter(Boolean).join(', ');
+    }
     let allOk = true;
     for (const item of order.line_items || []) {
       if (!item.sku) {
@@ -57,10 +66,13 @@ async function shopifyToOdoo() {
         log(`[shopify->odoo] FOUT voor SKU ${item.sku} (order ${order.id}):`, err.message);
       }
     }
-    // Alleen labelen als de volledige order verwerkt is, anders volgende run opnieuw.
-    if (allOk && !config.service.dryRun) {
-      await shopify.tagOrderSynced(order, SYNCED_TAG);
-      log(`[shopify->odoo] Order ${order.id} gelabeld als '${SYNCED_TAG}'.`);
+    if (!config.service.dryRun) {
+      if (allOk) {
+        log(`[shopify->odoo] Order ${orderName} afgeboekt en gelabeld als '${SYNCED_TAG}'.`);
+      } else {
+        await shopify.tagOrderSynced(order, ERROR_TAG);
+        log(`[shopify->odoo] ::warning:: Order ${orderName} NIET volledig afgeboekt: label '${ERROR_TAG}', met de hand nakijken in Odoo.`);
+      }
     }
   }
 }
